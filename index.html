@@ -6,76 +6,54 @@
 <title>Room Studio — Beauty Salon</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500;600&family=Great+Vibes&display=swap" rel="stylesheet"/>
 <style>
-/* 1. RESET CSS - PENTING AGAR FULL SCREEN */
+/* 1. RESET CSS */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root{
-  /* TEMA HITAM & PINK (SESUAI LOGO) */
-  --bg-main: #ffffff;
-  --bg-alt: #fdf8f9;
-  --white: #ffffff;
-  --primary-black: #0a0a0a;
-  --primary-black-hover: #222222;
-  --accent-pink: #e6a8b1;
-  --accent-pink-hover: #d68f9a;
-  --accent-soft: rgba(230, 168, 177, 0.15);
-  --text-dark: #1a1a1a;
-  --text-muted: #6b6b6b;
-  --border-color: #ebebeb;
-  --serif: 'Cormorant Garamond', serif;
-  --sans: 'Jost', sans-serif;
-  --script: 'Great Vibes', cursive;
-  --radius: 12px;
-  --shadow: 0 10px 30px rgba(0,0,0,0.04);
+  --bg-main: #ffffff; --bg-alt: #fdf8f9; --white: #ffffff;
+  --primary-black: #0a0a0a; --primary-black-hover: #222222;
+  --accent-pink: #e6a8b1; --accent-pink-hover: #d68f9a; --accent-soft: rgba(230, 168, 177, 0.15);
+  --text-dark: #1a1a1a; --text-muted: #6b6b6b; --border-color: #ebebeb;
+  --serif: 'Cormorant Garamond', serif; --sans: 'Jost', sans-serif; --script: 'Great Vibes', cursive;
+  --radius: 12px; --shadow: 0 10px 30px rgba(0,0,0,0.04);
 }
-
 html{scroll-behavior:smooth}
-body{ margin: 0; padding: 0; font-family:var(--sans); background:var(--bg-main); color:var(--text-dark); font-weight:300; min-height:100vh; }
-
-.nav{ position: absolute; top: 0; left: 0; width: 100%; z-index: 100; background: transparent; display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 5%; }
+body{ font-family:var(--sans); background:var(--bg-main); color:var(--text-dark); font-weight:300; min-height:100vh; }
+.nav{ position: absolute; top: 0; left: 0; width: 100%; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 5%; }
 .nav-logo{display:flex;align-items:center;gap:1rem}
-.logo-circle{width:45px;height:45px;border-radius:50%;background:transparent;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.logo-circle{width:45px;height:45px;border-radius:50%;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .brand-text{font-family:var(--serif);font-size:1.6rem;font-weight:600;letter-spacing:1px;color:#fff}
 .brand-text span{color:var(--accent-pink)}
-
-.nav-link{ color: var(--white); background-color: transparent; border: 2px solid var(--white); text-decoration: none; font-size: .85rem; font-weight: 500; letter-spacing: .5px; transition: all .3s; padding: 0.6rem 1.2rem; border-radius: 20px; }
+.nav-link{ color: var(--white); border: 2px solid var(--white); text-decoration: none; font-size: .85rem; font-weight: 500; letter-spacing: .5px; transition: all .3s; padding: 0.6rem 1.2rem; border-radius: 20px; }
 .nav-link:hover{ background-color: #fff; color: var(--primary-black); }
-
-.hero{ position: relative; width: 100%; height: 100vh; min-height: 500px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background-image: url('https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center; background-repeat: no-repeat; margin: 0; padding: 0 5%; }
+.hero{ position: relative; width: 100%; height: 100vh; min-height: 500px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background-image: url('https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center; background-repeat: no-repeat; padding: 0 5%; }
 .hero::before { content: ''; position: absolute; inset: 0; background: rgba(10, 10, 10, 0.4); z-index: 1; }
 .hero-content{ position: relative; z-index: 2; max-width: 900px; display: flex; flex-direction: column; align-items: center; margin-top: 80px; }
-.hero-tag { font-family: var(--script); color: var(--accent-pink); font-size: clamp(3rem, 5vw, 4.5rem); font-weight: 400; margin-bottom: -15px; letter-spacing: 2px; }
-.hero h1{ font-family: var(--serif); font-size: clamp(2rem, 5vw, 4.5rem); font-weight: 400; color: #ffffff; line-height: 1.15; margin-bottom: 1.5rem; letter-spacing: 2px; }
-.hero-sub{ color: #eaeaea; font-size: 1rem; line-height: 1.7; max-width: 650px; margin-bottom: 2.5rem; font-weight: 300; letter-spacing: 0.5px; }
+.hero-tag { font-family: var(--script); color: var(--accent-pink); font-size: clamp(3rem, 5vw, 4.5rem); letter-spacing: 2px; margin-bottom: -15px; }
+.hero h1{ font-family: var(--serif); font-size: clamp(2rem, 5vw, 4.5rem); color: #ffffff; line-height: 1.15; margin-bottom: 1.5rem; letter-spacing: 2px; }
+.hero-sub{ color: #eaeaea; font-size: 1rem; line-height: 1.7; max-width: 650px; margin-bottom: 2.5rem; }
 .btn-hero { background-color: transparent; color: var(--accent-pink); padding: 1rem 2.5rem; font-family: var(--sans); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px; border: 2px solid var(--accent-pink); cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; text-decoration: none; }
 .btn-hero:hover { background-color: var(--accent-pink); color: var(--primary-black); }
-
 .main{ max-width: 1200px; margin: 0 auto; padding: 5rem 5%; background: var(--bg-main); }
-.s-title{font-family:var(--serif);font-size:2.5rem;font-weight:400;margin-bottom:.5rem;color:var(--primary-black);text-align:center}
+.s-title{font-family:var(--serif);font-size:2.5rem;margin-bottom:.5rem;color:var(--primary-black);text-align:center}
 .s-sub{color:var(--text-muted);font-size:1rem;margin-bottom:3rem;text-align:center}
-
 .kat-view{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2.5rem;margin-bottom:4rem}
 .kat-card{background:var(--white);border:1px solid var(--border-color);border-radius:16px;overflow:hidden;cursor:pointer;transition:all 0.3s;box-shadow:var(--shadow)}
 .kat-card:hover{transform:translateY(-5px);border-color:var(--accent-pink);box-shadow:0 15px 35px rgba(230, 168, 177, 0.2)}
 .kat-img img{width:100%;height:220px;object-fit:cover;border-bottom:1px solid var(--border-color);transition:transform 0.5s}
 .kat-card:hover .kat-img img{transform:scale(1.05)}
-.kat-img{overflow:hidden;position:relative}
 .kat-title{padding:1.5rem;text-align:center;font-family:var(--serif);font-size:1.6rem;font-weight:600;color:var(--primary-black);letter-spacing:1px}
-
 .svc-view{display:none;margin-bottom:4rem;background:var(--white);padding:2rem;border-radius:16px;border:1px solid var(--border-color);box-shadow:var(--shadow)}
 .svc-view-header{display:flex;align-items:center;gap:1.5rem;margin-bottom:2rem;flex-wrap:wrap;}
-.btn-back{background:transparent;border:1px solid var(--border-color);color:var(--text-muted);padding:0.6rem 1.2rem;border-radius:30px;cursor:pointer;transition:all 0.3s;font-size:0.9rem;font-family:inherit}
+.btn-back{background:transparent;border:1px solid var(--border-color);color:var(--text-muted);padding:0.6rem 1.2rem;border-radius:30px;cursor:pointer;transition:all 0.3s;font-size:0.9rem;}
 .btn-back:hover{color:var(--primary-black);border-color:var(--primary-black);background:var(--border-color)}
 .svc-view-title{font-family:var(--serif);font-size:1.8rem;color:var(--primary-black);margin:0; font-weight:600;}
-
 .svc-list-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1.5rem}
 .svc-item { display: flex; flex-direction: column; background-color: var(--white); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px; cursor: pointer; transition: all 0.3s; position: relative; text-align: left; }
 .svc-item:hover { transform: translateY(-5px); border-color: var(--accent-pink); box-shadow: 0 8px 25px rgba(230, 168, 177, 0.1); }
 .svc-item.selected { border-color: var(--accent-pink); background: var(--accent-soft); }
 .svc-item.selected::after { content: '✓'; position: absolute; top: 1rem; right: 1rem; background-color: var(--accent-pink); color: var(--white); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 1.1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 .svc-item-name { font-weight: 400; color: var(--text-dark); font-size: 1rem; line-height: 1.4; margin-bottom: 0.5rem; }
-.svc-item-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; font-weight: 300; }
-
+.svc-item-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
 .selected-svc-panel{background:var(--white);border:1px solid var(--accent-pink);border-radius:var(--radius);padding:2rem;margin-bottom:3rem;display:none;box-shadow:var(--shadow)}
 .selected-svc-panel.show{display:block}
 .selected-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
@@ -84,7 +62,6 @@ body{ margin: 0; padding: 0; font-family:var(--sans); background:var(--bg-main);
 .selected-tag{background:var(--primary-black);border:1px solid var(--border-color);border-radius:30px;padding:.6rem 1.2rem;font-size:.9rem;color:var(--white);display:flex;align-items:center;gap:.8rem}
 .selected-tag button{background:transparent;border:none;color:var(--accent-pink);cursor:pointer;font-size:1.2rem;line-height:1;transition:all .3s}
 .selected-tag button:hover{color:#fff}
-
 .form-card{background:var(--bg-alt);border:1px solid var(--border-color);border-radius:24px;padding:3rem;box-shadow:var(--shadow)}
 .form-title{font-family:var(--serif);font-size:2rem;font-weight:600;margin-bottom:.5rem;color:var(--primary-black)}
 .form-sub{color:var(--text-muted);font-size:1rem;margin-bottom:2.5rem}
@@ -98,48 +75,40 @@ body{ margin: 0; padding: 0; font-family:var(--sans); background:var(--bg-main);
 .fg .hint.ok{color:#4a8a5f;font-weight:500}
 .fg .hint.err{color:#d9534f;font-weight:500}
 .form-action{display:flex;align-items:center;justify-content:center;margin-top:3rem}
-
 .btn{padding:1rem 3rem;border-radius:30px;font-family:var(--sans);font-size:1rem;font-weight:500;cursor:pointer;border:none;transition:all .3s;letter-spacing:1px;text-transform:uppercase}
-.btn-accent{background:transparent;color:var(--accent-pink);border:2px solid var(--accent-pink);box-shadow:none;}
+.btn-accent{background:transparent;color:var(--accent-pink);border:2px solid var(--accent-pink);}
 .btn-accent:hover:not(:disabled){background:var(--accent-pink);color:var(--primary-black);transform:translateY(-2px)}
-.btn-accent:disabled{opacity:.5;cursor:not-allowed}
 .btn-outline{background:transparent;color:var(--primary-black);border:1px solid var(--border-color)}
-.btn-outline:hover{border-color:var(--primary-black);color:var(--primary-black);background-color: var(--border-color);}
-
+.btn-outline:hover{border-color:var(--primary-black);background-color: var(--border-color);}
 .success-card{display:none;background:var(--white);border:2px solid #4a8a5f;border-radius:24px;padding:4rem 2rem;text-align:center;box-shadow:var(--shadow)}
 .success-card.show{display:block}
 .success-icon{width:80px;height:80px;background:#eef5f0;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 2rem;font-size:2.5rem;color:#4a8a5f}
 .success-card h3{font-family:var(--serif);font-size:2.5rem;font-weight:600;margin-bottom:1rem;color:var(--text-dark)}
 .success-kode{display:inline-block;background:var(--bg-alt);border:1px dashed #4a8a5f;border-radius:12px;padding:1rem 2.5rem;font-size:1.5rem;font-weight:500;letter-spacing:2px;margin:1.5rem 0;color:#4a8a5f}
-
-.price-section{margin-top:6rem;padding-top:5rem;border-top:1px solid var(--border-color);padding-left: 2%; padding-right: 2%;}
+.price-section{margin-top:6rem;padding-top:5rem;border-top:1px solid var(--border-color);padding: 0 2%;}
 .price-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:2rem;margin-top:3rem}
 .price-block{background:var(--white);border:1px solid var(--border-color);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
 .price-block-head{background:var(--primary-black);padding:1.5rem;font-family:var(--serif);font-size:1.3rem;font-weight:500;color:var(--white);text-align:center}
-.price-row{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.5rem;border-bottom:1px dashed var(--border-color);font-size:.95rem;transition:background .2s}
+.price-row{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.5rem;border-bottom:1px dashed var(--border-color);font-size:.95rem;}
 .price-row:last-child{border-bottom:none}
 .price-row:hover{background:var(--bg-alt)}
-.price-row span:last-child{color:var(--primary-black);font-weight:600;font-size:.9rem}
-
-.toast{position:fixed;bottom:2rem;right:2rem;z-index:9999;background:var(--accent-pink);color:var(--primary-black);padding:1.2rem 2rem;border-radius:12px;font-size:1rem;transform:translateY(100px);opacity:0;transition:all .4s;box-shadow:var(--shadow)}
+.price-row span:last-child{color:var(--primary-black);font-weight:600;}
+.toast{position:fixed;bottom:2rem;right:2rem;z-index:9999;background:var(--accent-pink);color:var(--primary-black);padding:1.2rem 2rem;border-radius:12px;transform:translateY(100px);opacity:0;transition:all .4s;box-shadow:var(--shadow)}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.ok{border-left:5px solid #4a8a5f}
 .toast.err{border-left:5px solid #d9534f}
 footer{text-align:center;padding:3rem;border-top:1px solid var(--border-color);color:var(--text-muted);font-size:.9rem;background:var(--white)}
 footer a{color:var(--primary-black);text-decoration:none;font-weight:500}
 footer a:hover{color:var(--accent-pink)}
-
 @media(max-width:992px){ .hero-tag {font-size: 3rem;} .hero h1 {font-size: 2.5rem;} }
-@media(max-width:768px){ .nav{padding:1rem 5%} .form-grid{grid-template-columns:1fr} .s-title{font-size:2rem} .form-card{padding:2rem 1.5rem} .btn-back {font-size: 0.8rem; padding: 0.5rem 1rem;} }
+@media(max-width:768px){ .nav{padding:1rem 5%} .form-grid{grid-template-columns:1fr} .s-title{font-size:2rem} .form-card{padding:2rem 1.5rem} }
 </style>
 </head>
 <body>
 
 <nav class="nav">
   <div class="nav-logo">
-    <div class="logo-circle" style="background: transparent; overflow: hidden;">
-      <img src="image/logo.jpeg" alt="Room Studio Logo" style="width: 100%; height: 100%; object-fit: cover;" />
-    </div>
+    <div class="logo-circle"><img src="image/logo.jpeg" alt="Room Studio Logo" style="width:100%;height:100%;object-fit:cover;"/></div>
     <div class="brand-text">Room Studio</div>
   </div>
   <a href="login.php" class="nav-link">Admin Login</a>
@@ -159,7 +128,7 @@ footer a:hover{color:var(--accent-pink)}
   <p class="s-sub" id="section-subtitle">Silakan pilih kategori perawatan yang Anda butuhkan.</p>
 
   <div class="kat-view" id="kat-view">
-    <p style="color:var(--text-muted);text-align:center;grid-column:1/-1">Memuat kategori...</p>
+    <p style="color:var(--text-muted);text-align:center;grid-column:1/-1">Memuat data dari database...</p>
   </div>
 
   <div class="svc-view" id="svc-view">
@@ -181,20 +150,10 @@ footer a:hover{color:var(--accent-pink)}
   <div class="form-card" id="form-section">
     <div class="form-title">Formulir Reservasi</div>
     <p class="form-sub">Isi data diri dan pilih waktu kunjungan Anda.</p>
-
     <div class="form-grid">
-      <div class="fg">
-        <label>Nama Lengkap *</label>
-        <input type="text" id="f-nama" placeholder="Masukkan nama Anda"/>
-      </div>
-      <div class="fg">
-        <label>No. WhatsApp *</label>
-        <input type="tel" id="f-telepon" placeholder="Contoh: 081234567890"/>
-      </div>
-      <div class="fg">
-        <label>Tanggal Kunjungan *</label>
-        <input type="date" id="f-tanggal" onchange="cekSlot()"/>
-      </div>
+      <div class="fg"><label>Nama Lengkap *</label><input type="text" id="f-nama" placeholder="Masukkan nama Anda"/></div>
+      <div class="fg"><label>No. WhatsApp *</label><input type="tel" id="f-telepon" placeholder="Contoh: 081234567890"/></div>
+      <div class="fg"><label>Tanggal Kunjungan *</label><input type="date" id="f-tanggal" onchange="cekSlot()"/></div>
       <div class="fg">
         <label>Pilih Waktu *</label>
         <select id="f-jam" onchange="cekSlot()">
@@ -207,16 +166,9 @@ footer a:hover{color:var(--accent-pink)}
         </select>
         <span class="hint" id="slot-hint"></span>
       </div>
-      <div class="fg full">
-        <label>Catatan Tambahan (Opsional)</label>
-        <textarea id="f-catatan" rows="3" placeholder="Sampaikan preferensi khusus Anda..."></textarea>
-      </div>
+      <div class="fg full"><label>Catatan Tambahan (Opsional)</label><textarea id="f-catatan" rows="3" placeholder="Sampaikan preferensi khusus Anda..."></textarea></div>
     </div>
-    <div class="form-action">
-      <button class="btn btn-accent" id="btn-submit" onclick="submitBooking()">
-        <span id="btn-text">Konfirmasi Reservasi</span>
-      </button>
-    </div>
+    <div class="form-action"><button class="btn btn-accent" id="btn-submit" onclick="submitBooking()"><span id="btn-text">Konfirmasi Reservasi</span></button></div>
   </div>
 
   <div class="success-card" id="success-card">
@@ -232,9 +184,7 @@ footer a:hover{color:var(--accent-pink)}
   <div class="price-section" id="price-list">
     <div class="s-title">Daftar Harga</div>
     <p class="s-sub">Informasi lengkap harga layanan di Room Studio.</p>
-    <div class="price-grid" id="price-grid">
-      <p style="color:var(--text-muted);text-align:center;grid-column:1/-1">Memuat daftar harga...</p>
-    </div>
+    <div class="price-grid" id="price-grid"><p style="color:var(--text-muted);text-align:center;grid-column:1/-1">Memuat daftar harga...</p></div>
   </div>
 </div>
 
@@ -248,67 +198,17 @@ footer a:hover{color:var(--accent-pink)}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-// 1. INISIALISASI SUPABASE
+// INISIALISASI
 const supabaseUrl = 'https://vhsrmfmvblfqolhwgwbt.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoc3JtZm12YmxmcW9saHdnd2J0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2ODQ4NjAsImV4cCI6MjA5MTI2MDg2MH0.jxVo-xAjpEyaqGiROMlWbdwmCga6GKNz_rnNrRYPpWQ';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-// 2. VARIABEL GLOBAL & KONTEN TEKS
 let allLayanan = [];
 let selectedServices = new Set();
 let uniqueCategories = [];
 
-const sampleImages = {
-  'Eyelash': 'image/Eyelash.jpg',
-  'Nail': 'image/Nail.jpg',
-  'Hair Service': 'image/Hair.jpg',
-};
+const sampleImages = {'Eyelash': 'image/Eyelash.jpg', 'Nail': 'image/Nail.jpg', 'Hair Service': 'image/Hair.jpg'};
 const defaultImg = 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=400&q=80';
-
-const categoryDescriptions = {
-  'Eyelash': 'Perawatan bulu mata eksklusif untuk tampilan lentik, bervolume natural, dan tahan lama.',
-  'Nail': 'Perawatan esensial dan seni kuku (Manicure/Pedicure, Gel Paint, Extension) untuk kuku cantik yang merefleksikan gaya Anda.',
-  'Hair Service': 'Layanan rambut lengkap (Cutting, Styling, Coloring, Treatment intensif) untuk menjaga kesehatan dan keindahan mahkota Anda.',
-};
-
-const specificServiceDescriptions = {
-  'Natural Lash': 'Pemasangan bulu mata yang terlihat seperti bulu mata asli, sangat natural dan ringan.',
-  'Standar Lash': 'Pemasangan bulu mata dengan ketebalan standar untuk tampilan lentik yang pas.',
-  'Volume Lash': 'Teknik pemasangan bulu mata bercabang untuk hasil yang lebih penuh, tebal, dan dramatis.',
-  'Wispy Lash': 'Gaya pemasangan dengan panjang bulu mata yang bervariasi.',
-  'Anime Lash': 'Gaya bulu mata populer yang menyerupai karakter anime.',
-  'Cat Eye Lash': 'Pemasangan dengan bulu mata yang lebih panjang di ujung luar mata.',
-  'Remove': 'Pelepasan bulu mata extension lama secara aman.',
-  'Retouch': 'Pengisian kembali area bulu mata extension yang sudah rontok.',
-  'Menicure': 'Perawatan esensial untuk membersihkan kutikula dan kuku tangan.',
-  'Pedicure': 'Perawatan relaksasi untuk kaki dan merapikan kuku jari kaki.',
-  'Pedicure+Callus': 'Paket pedicure lengkap ditambah perawatan mengangkat kapalan.',
-  'Classic Gel Hand': 'Aplikasi pewarnaan kuku dengan cat gel pada tangan.',
-  'Classic Gel Feet': 'Aplikasi pewarnaan kuku dengan cat gel pada kaki.',
-  'French Nail': 'Gaya kuku klasik dengan ujung kuku berwarna putih.',
-  'Ombré Nail': 'Teknik pewarnaan kuku dengan gradasi dua warna.',
-  'Cat Eye': 'Teknik pewarnaan gel khusus dengan efek mata kucing.',
-  'Acrylic Ext': 'Pemanjangan kuku buatan menggunakan bahan acrylic.',
-  'Half Ext': 'Pemanjangan kuku hanya pada bagian setengah ujung kuku.',
-  'Full Ext': 'Pemanjangan kuku penuh menutupi seluruh kuku asli.',
-  'Remove Gel': 'Pembersihan cat kuku gel lama secara profesional.',
-  'Remove Ext': 'Pelepasan kuku sambung (extension) lama.',
-  'Art 1pcs': 'Penambahan seni lukis kuku/hiasan untuk 1 jari.',
-  'Art 2pcs': 'Penambahan seni lukis kuku/hiasan untuk 2 jari.',
-  'Art 4pcs': 'Penambahan seni lukis kuku/hiasan untuk 4 jari.',
-  'Overlay': 'Lapisan pelindung tambahan bening di atas kuku asli.',
-  'Hair Wash': 'Pencucian rambut yang menenangkan menggunakan sampo premium.',
-  'Hair Wash + Mask Biasa': 'Paket cuci rambut dilanjutkan dengan aplikasi masker.',
-  'Hair Wash + Mask Merek': 'Paket cuci rambut dengan masker rambut bermerek.',
-  'Wash + Mask B + Catok': 'Paket lengkap: Cuci rambut, masker biasa, dan ditata.',
-  'Wash + Mask M + Catok': 'Paket premium: Cuci rambut, masker bermerek, dan ditata.',
-  'Hair Wash + Catok': 'Pencucian rambut dilanjutkan dengan penataan rambut.',
-  'Catok Only': 'Layanan khusus penataan rambut menggunakan catokan.',
-  'Creambath Biasa': 'Perawatan relaksasi rambut dan kulit kepala.',
-  'Creambath Merek': 'Perawatan relaksasi rambut premium bermerek.',
-  'Creambath B + Catok': 'Paket creambath standar diakhiri dengan catokan.',
-  'Creambath M + Catok': 'Paket relaksasi creambath produk bermerek diakhiri catokan.'
-};
 
 function formatHarga(min, max, satuan) {
   const fmt = n => 'Rp ' + parseInt(n).toLocaleString('id-ID');
@@ -317,68 +217,59 @@ function formatHarga(min, max, satuan) {
   return satuan ? base + ' ' + satuan : base;
 }
 
-// 3. MENGAMBIL DATA DARI SUPABASE
+// FUNGSI UTAMA LOAD DATA
 async function loadLayanan() {
   try {
-    document.getElementById('kat-view').innerHTML = `<p style="text-align:center;">Menghubungi Supabase...</p>`;
+    document.getElementById('kat-view').innerHTML = `<p style="text-align:center;">Menghubungkan ke database...</p>`;
+    
+    // Tarik data dengan relasi
+    const { data, error } = await supabase.from('layanan').select('*, kategori:kategori_id(nama, urutan)').eq('aktif', true);
 
-    // Kita gunakan query paling sederhana tanpa relasi untuk menghindari error
-    const { data, error } = await supabase
-      .from('layanan')
-      .select('*');
-
-    // JIKA ADA ERROR DARI SUPABASE
+    // Deteksi Error
     if (error) {
       document.getElementById('kat-view').innerHTML = `<div style="background:#fee; padding:20px; border-radius:10px; color:red; text-align:center;">
-        <strong>KONEKSI SUPABASE GAGAL!</strong><br>
-        Pesan Error: ${error.message}
+        <strong>Koneksi Gagal (Error Database)</strong><br>${error.message}
       </div>`;
       return;
     }
 
-    // JIKA DATA KOSONG
+    // Deteksi Data Kosong
     if (!data || data.length === 0) {
       document.getElementById('kat-view').innerHTML = `<div style="background:#fff3cd; padding:20px; border-radius:10px; color:#856404; text-align:center;">
-        <strong>KONEKSI SUKSES, TAPI DATA KOSONG!</strong><br>
-        Silakan buka Dashboard Supabase, masuk ke SQL Editor, dan pastikan Anda sudah menjalankan kode INSERT untuk memasukkan data layanan.
+        <strong>Koneksi Berhasil, Tapi Data Kosong!</strong><br>Pastikan Anda sudah mengisi data SQL di Supabase.
       </div>`;
       return;
     }
 
-    // JIKA BERHASIL (Meskipun tanpa relasi tabel kategori)
+    // Format Data
     allLayanan = data.map(l => ({
       id: l.id,
       nama: l.nama,
-      kategori: 'Perawatan Salon', // Digabung sementara karena kita matikan relasi
+      kategori: l.kategori ? l.kategori.nama : 'Lainnya',
       harga_display: formatHarga(l.harga_min, l.harga_max, l.satuan),
-      urutan_kategori: 1,
+      urutan_kategori: l.kategori ? l.kategori.urutan : 99,
       harga_min: l.harga_min
-    }));
+    })).sort((a, b) => a.urutan_kategori - b.urutan_kategori);
 
-    uniqueCategories = ['Perawatan Salon'];
+    uniqueCategories = [...new Set(allLayanan.map(l => l.kategori))];
     showCategories();
     renderPriceList(allLayanan); 
 
   } catch (err) {
-    document.getElementById('kat-view').innerHTML = `<p style="color:red; text-align:center;">Terjadi Kesalahan Sistem: ${err.message}</p>`;
+    document.getElementById('kat-view').innerHTML = `<div style="background:#fee; color:red; text-align:center; padding:20px;"><strong>Terjadi Kesalahan Sistem:</strong><br>${err.message}</div>`;
   }
 }
 
-// 4. FUNGSI TAMPILAN (UI)
 function showCategories() {
   document.getElementById('kat-view').style.display = 'grid';
   document.getElementById('svc-view').style.display = 'none';
   document.getElementById('section-subtitle').textContent = 'Silakan pilih kategori perawatan yang Anda butuhkan.';
-  
-  const katView = document.getElementById('kat-view');
-  katView.innerHTML = uniqueCategories.map(cat => {
+  document.getElementById('kat-view').innerHTML = uniqueCategories.map(cat => {
     let imgSrc = sampleImages[cat] || defaultImg;
-    let desc = categoryDescriptions[cat] || 'Perawatan kecantikan eksklusif untuk hasil sempurna dan memuaskan.';
     return `
       <div class="kat-card" onclick="showServices('${cat}')">
         <div class="kat-img"><img src="${imgSrc}" alt="${cat}" /></div>
         <div class="kat-title">${cat}</div>
-        <div class="kat-desc" style="padding: 0 1.5rem 1.5rem 1.5rem; text-align: center; font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; font-weight: 300;">${desc}</div>
       </div>
     `;
   }).join('');
@@ -392,11 +283,10 @@ function showServices(catName) {
   
   const list = allLayanan.filter(l => l.kategori === catName);
   document.getElementById('svc-list').innerHTML = list.map(l => {
-    let desc = specificServiceDescriptions[l.nama] || categoryDescriptions[catName] || 'Perawatan kecantikan eksklusif untuk hasil terbaik.';
     return `
     <div class="svc-item ${selectedServices.has(l.id) ? 'selected' : ''}" id="svc-${l.id}" onclick="toggleService(${l.id})">
       <div class="svc-item-name">${l.nama}</div>
-      <div class="svc-item-desc">${desc}</div>
+      <div class="svc-item-desc" style="color:var(--accent-pink); font-weight:500;">${l.harga_display}</div>
     </div>
   `}).join('');
 }
@@ -407,17 +297,13 @@ function renderPriceList(list) {
     <div class="price-block">
       <div class="price-block-head">${cat}</div>
       ${list.filter(l => l.kategori === cat).map(l => `
-        <div class="price-row">
-          <span>${l.nama}</span>
-          <span>${l.harga_display}</span>
-        </div>`).join('')}
+        <div class="price-row"><span>${l.nama}</span><span>${l.harga_display}</span></div>
+      `).join('')}
     </div>`).join('');
 }
 
 function toggleService(id) {
-  if (selectedServices.has(id)) selectedServices.delete(id);
-  else selectedServices.add(id);
-  
+  if (selectedServices.has(id)) selectedServices.delete(id); else selectedServices.add(id);
   const itemEl = document.getElementById(`svc-${id}`);
   if (itemEl) itemEl.classList.toggle('selected', selectedServices.has(id));
   updateSelectedPanel();
@@ -427,7 +313,6 @@ function updateSelectedPanel() {
   const panel = document.getElementById('selected-panel');
   const list = document.getElementById('selected-list');
   if (selectedServices.size === 0) { panel.classList.remove('show'); return; }
-  
   panel.classList.add('show');
   list.innerHTML = Array.from(selectedServices).map(sid => {
     const svc = allLayanan.find(l => l.id == sid);
@@ -441,118 +326,62 @@ function clearAllServices() {
   updateSelectedPanel();
 }
 
-// 5. TRANSAKSI KE SUPABASE
 async function cekSlot() {
-  const tgl = document.getElementById('f-tanggal').value;
-  const jam = document.getElementById('f-jam').value;
+  const tgl = document.getElementById('f-tanggal').value; const jam = document.getElementById('f-jam').value;
   const hint = document.getElementById('slot-hint');
   if (!tgl || !jam) { hint.textContent = ''; return; }
-
-  hint.textContent = 'Memeriksa ketersediaan...';
-  hint.className = 'hint';
+  hint.textContent = 'Memeriksa...'; hint.className = 'hint';
   
-  const { count, error } = await supabase
-    .from('booking')
-    .select('*', { count: 'exact', head: true })
-    .eq('tanggal', tgl)
-    .eq('jam', jam)
-    .neq('status', 'batal');
-
-  if (count === 0) {
-    hint.textContent = '✓ Jadwal tersedia'; hint.className = 'hint ok';
-  } else {
-    hint.textContent = '✕ Jadwal penuh. Silakan pilih waktu lain.'; hint.className = 'hint err';
-  }
+  const { count, error } = await supabase.from('booking').select('*', { count: 'exact', head: true }).eq('tanggal', tgl).eq('jam', jam).neq('status', 'batal');
+  if (count === 0) { hint.textContent = '✓ Jadwal tersedia'; hint.className = 'hint ok'; } 
+  else { hint.textContent = '✕ Jadwal penuh.'; hint.className = 'hint err'; }
 }
 
 async function submitBooking() {
-  const nama = document.getElementById('f-nama').value.trim();
-  const telepon = document.getElementById('f-telepon').value.trim();
-  const tanggal = document.getElementById('f-tanggal').value;
-  const jam = document.getElementById('f-jam').value;
-  const catatan = document.getElementById('f-catatan').value.trim();
+  const nama = document.getElementById('f-nama').value.trim(), telepon = document.getElementById('f-telepon').value.trim();
+  const tanggal = document.getElementById('f-tanggal').value, jam = document.getElementById('f-jam').value, catatan = document.getElementById('f-catatan').value.trim();
 
-  if (!nama || !telepon || selectedServices.size === 0 || !tanggal || !jam) {
-    showToast('Lengkapi formulir dan pastikan Anda telah memilih layanan', 'err'); return;
-  }
+  if (!nama || !telepon || selectedServices.size === 0 || !tanggal || !jam) { showToast('Lengkapi formulir & layanan', 'err'); return; }
 
-  const btn = document.getElementById('btn-submit');
-  btn.disabled = true; document.getElementById('btn-text').textContent = 'Memproses...';
+  const btn = document.getElementById('btn-submit'); btn.disabled = true; document.getElementById('btn-text').textContent = 'Memproses...';
 
   try {
     let pelangganId;
     const { data: existUser } = await supabase.from('pelanggan').select('id').eq('telepon', telepon).single();
-    
-    if (existUser) {
-      pelangganId = existUser.id;
-      await supabase.from('pelanggan').update({ nama: nama }).eq('id', pelangganId);
-    } else {
-      const { data: newUser } = await supabase.from('pelanggan').insert([{ nama, telepon }]).select().single();
-      pelangganId = newUser.id;
-    }
+    if (existUser) { pelangganId = existUser.id; await supabase.from('pelanggan').update({ nama: nama }).eq('id', pelangganId); } 
+    else { const { data: newUser } = await supabase.from('pelanggan').insert([{ nama, telepon }]).select().single(); pelangganId = newUser.id; }
 
-    const randomCode = Math.floor(1000 + Math.random() * 9000);
-    const kodeBooking = 'RS-' + randomCode;
-
-    const { data: newBooking, error: errBooking } = await supabase
-      .from('booking')
-      .insert([{
-        kode: kodeBooking,
-        pelanggan_id: pelangganId,
-        tanggal: tanggal,
-        jam: jam,
-        catatan: catatan,
-        status: 'pending'
-      }]).select().single();
-
+    const kodeBooking = 'RS-' + Math.floor(1000 + Math.random() * 9000);
+    const { data: newBooking, error: errBooking } = await supabase.from('booking').insert([{ kode: kodeBooking, pelanggan_id: pelangganId, tanggal, jam, catatan, status: 'pending' }]).select().single();
     if (errBooking) throw errBooking;
 
-    const layananToInsert = Array.from(selectedServices).map(id => {
-      const svc = allLayanan.find(l => l.id === id);
-      return { booking_id: newBooking.id, layanan_id: id, harga_saat_booking: svc.harga_min };
-    });
-
+    const layananToInsert = Array.from(selectedServices).map(id => { const svc = allLayanan.find(l => l.id === id); return { booking_id: newBooking.id, layanan_id: id, harga_saat_booking: svc.harga_min }; });
     await supabase.from('booking_layanan').insert(layananToInsert);
 
     btn.disabled = false; document.getElementById('btn-text').textContent = 'Konfirmasi Reservasi';
-    
-    document.getElementById('form-section').style.display = 'none';
-    document.getElementById('selected-panel').style.display = 'none';
-    const sc = document.getElementById('success-card');
-    sc.classList.add('show');
+    document.getElementById('form-section').style.display = 'none'; document.getElementById('selected-panel').style.display = 'none';
+    const sc = document.getElementById('success-card'); sc.classList.add('show');
     document.getElementById('success-kode').textContent = kodeBooking;
-    
-    const namaLayananStr = Array.from(selectedServices).map(id => allLayanan.find(l => l.id === id).nama).join(', ');
-    document.getElementById('success-layanan').textContent = namaLayananStr;
-    
-    sc.scrollIntoView({ behavior: 'smooth' });
-    showToast('Reservasi berhasil dibuat!', 'ok');
+    document.getElementById('success-layanan').textContent = Array.from(selectedServices).map(id => allLayanan.find(l => l.id === id).nama).join(', ');
+    sc.scrollIntoView({ behavior: 'smooth' }); showToast('Reservasi berhasil!', 'ok');
 
   } catch (err) {
-    console.error(err);
     btn.disabled = false; document.getElementById('btn-text').textContent = 'Konfirmasi Reservasi';
-    showToast('Terjadi kesalahan sistem. Pastikan RLS Supabase dimatikan.', 'err');
+    showToast('Error Database: Pastikan RLS dimatikan.', 'err');
   }
 }
 
 function resetForm() {
-  document.getElementById('success-card').classList.remove('show');
-  document.getElementById('form-section').style.display = '';
-  document.getElementById('selected-panel').style.display = '';
+  document.getElementById('success-card').classList.remove('show'); document.getElementById('form-section').style.display = ''; document.getElementById('selected-panel').style.display = '';
   ['f-nama','f-telepon','f-catatan','f-tanggal','f-jam'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('slot-hint').textContent = '';
-  clearAllServices();
-  showCategories();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById('slot-hint').textContent = ''; clearAllServices(); showCategories(); window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function showToast(msg, type = '') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'toast ' + type + ' show';
+  const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast ' + type + ' show';
   setTimeout(() => t.classList.remove('show'), 4000);
 }
 
-// Inisialisasi
 document.getElementById('f-tanggal').min = new Date().toISOString().split('T')[0];
 loadLayanan();
 </script>
