@@ -198,10 +198,10 @@ footer a:hover{color:var(--accent-pink)}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-// INISIALISASI
+// INISIALISASI (NAMA VARIABEL DIUBAH MENJADI 'db' AGAR TIDAK BENTROK)
 const supabaseUrl = 'https://vhsrmfmvblfqolhwgwbt.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoc3JtZm12YmxmcW9saHdnd2J0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2ODQ4NjAsImV4cCI6MjA5MTI2MDg2MH0.jxVo-xAjpEyaqGiROMlWbdwmCga6GKNz_rnNrRYPpWQ';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+const db = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 let allLayanan = [];
 let selectedServices = new Set();
@@ -222,8 +222,8 @@ async function loadLayanan() {
   try {
     document.getElementById('kat-view').innerHTML = `<p style="text-align:center;">Menghubungkan ke database...</p>`;
     
-    // Tarik data dengan relasi
-    const { data, error } = await supabase.from('layanan').select('*, kategori:kategori_id(nama, urutan)').eq('aktif', true);
+    // Tarik data dengan relasi menggunakan variabel 'db'
+    const { data, error } = await db.from('layanan').select('*, kategori:kategori_id(nama, urutan)').eq('aktif', true);
 
     // Deteksi Error
     if (error) {
@@ -256,7 +256,7 @@ async function loadLayanan() {
     renderPriceList(allLayanan); 
 
   } catch (err) {
-    document.getElementById('kat-view').innerHTML = `<div style="background:#fee; color:red; text-align:center; padding:20px;"><strong>Terjadi Kesalahan Sistem:</strong><br>${err.message}</div>`;
+    document.getElementById('kat-view').innerHTML = `<div style="background:#fee; color:red; text-align:center; padding:20px;"><strong>Terjadi Kesalahan Sistem JavaScript:</strong><br>${err.message}</div>`;
   }
 }
 
@@ -332,58 +332,7 @@ async function cekSlot() {
   if (!tgl || !jam) { hint.textContent = ''; return; }
   hint.textContent = 'Memeriksa...'; hint.className = 'hint';
   
-  const { count, error } = await supabase.from('booking').select('*', { count: 'exact', head: true }).eq('tanggal', tgl).eq('jam', jam).neq('status', 'batal');
+  const { count, error } = await db.from('booking').select('*', { count: 'exact', head: true }).eq('tanggal', tgl).eq('jam', jam).neq('status', 'batal');
   if (count === 0) { hint.textContent = '✓ Jadwal tersedia'; hint.className = 'hint ok'; } 
   else { hint.textContent = '✕ Jadwal penuh.'; hint.className = 'hint err'; }
 }
-
-async function submitBooking() {
-  const nama = document.getElementById('f-nama').value.trim(), telepon = document.getElementById('f-telepon').value.trim();
-  const tanggal = document.getElementById('f-tanggal').value, jam = document.getElementById('f-jam').value, catatan = document.getElementById('f-catatan').value.trim();
-
-  if (!nama || !telepon || selectedServices.size === 0 || !tanggal || !jam) { showToast('Lengkapi formulir & layanan', 'err'); return; }
-
-  const btn = document.getElementById('btn-submit'); btn.disabled = true; document.getElementById('btn-text').textContent = 'Memproses...';
-
-  try {
-    let pelangganId;
-    const { data: existUser } = await supabase.from('pelanggan').select('id').eq('telepon', telepon).single();
-    if (existUser) { pelangganId = existUser.id; await supabase.from('pelanggan').update({ nama: nama }).eq('id', pelangganId); } 
-    else { const { data: newUser } = await supabase.from('pelanggan').insert([{ nama, telepon }]).select().single(); pelangganId = newUser.id; }
-
-    const kodeBooking = 'RS-' + Math.floor(1000 + Math.random() * 9000);
-    const { data: newBooking, error: errBooking } = await supabase.from('booking').insert([{ kode: kodeBooking, pelanggan_id: pelangganId, tanggal, jam, catatan, status: 'pending' }]).select().single();
-    if (errBooking) throw errBooking;
-
-    const layananToInsert = Array.from(selectedServices).map(id => { const svc = allLayanan.find(l => l.id === id); return { booking_id: newBooking.id, layanan_id: id, harga_saat_booking: svc.harga_min }; });
-    await supabase.from('booking_layanan').insert(layananToInsert);
-
-    btn.disabled = false; document.getElementById('btn-text').textContent = 'Konfirmasi Reservasi';
-    document.getElementById('form-section').style.display = 'none'; document.getElementById('selected-panel').style.display = 'none';
-    const sc = document.getElementById('success-card'); sc.classList.add('show');
-    document.getElementById('success-kode').textContent = kodeBooking;
-    document.getElementById('success-layanan').textContent = Array.from(selectedServices).map(id => allLayanan.find(l => l.id === id).nama).join(', ');
-    sc.scrollIntoView({ behavior: 'smooth' }); showToast('Reservasi berhasil!', 'ok');
-
-  } catch (err) {
-    btn.disabled = false; document.getElementById('btn-text').textContent = 'Konfirmasi Reservasi';
-    showToast('Error Database: Pastikan RLS dimatikan.', 'err');
-  }
-}
-
-function resetForm() {
-  document.getElementById('success-card').classList.remove('show'); document.getElementById('form-section').style.display = ''; document.getElementById('selected-panel').style.display = '';
-  ['f-nama','f-telepon','f-catatan','f-tanggal','f-jam'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('slot-hint').textContent = ''; clearAllServices(); showCategories(); window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function showToast(msg, type = '') {
-  const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast ' + type + ' show';
-  setTimeout(() => t.classList.remove('show'), 4000);
-}
-
-document.getElementById('f-tanggal').min = new Date().toISOString().split('T')[0];
-loadLayanan();
-</script>
-</body>
-</html>
