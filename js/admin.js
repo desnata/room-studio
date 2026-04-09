@@ -1,4 +1,4 @@
-// INISIALISASI
+// INISIALISASI SUPABASE
 const db = window.supabase.createClient('https://vhsrmfmvblfqolhwgwbt.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoc3JtZm12YmxmcW9saHdnd2J0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2ODQ4NjAsImV4cCI6MjA5MTI2MDg2MH0.jxVo-xAjpEyaqGiROMlWbdwmCga6GKNz_rnNrRYPpWQ');
 
 // CEK LOGIN
@@ -40,7 +40,6 @@ function showPanel(p, btn) {
   if(p==='dashboard') loadDashboard(); if(p==='bookings') loadBookings(); if(p==='schedule') loadJadwal(); if(p==='customers') loadPelanggan();
 }
 
-// FORMAT DATA BOOKING SUPABASE KE FORMAT LAMA
 function formatBookingData(data) {
   return data.map(b => {
     let totalHarga = 0; let layananList = [];
@@ -55,32 +54,30 @@ function formatBookingData(data) {
 async function loadDashboard() {
   const today = new Date().toISOString().split('T')[0];
   
-  // Ambil Data Stats
   const { count: tAll } = await db.from('booking').select('*', { count: 'exact', head: true });
   const { count: tPending } = await db.from('booking').select('*', { count: 'exact', head: true }).eq('status', 'pending');
   const { count: tToday } = await db.from('booking').select('*', { count: 'exact', head: true }).eq('tanggal', today).neq('status', 'batal');
   const { count: tCust } = await db.from('pelanggan').select('*', { count: 'exact', head: true });
 
+  // PERBAIKAN WARNA: Mengubah var(--bg-sidebar) menjadi var(--primary-hover) agar terlihat jelas
   $('dash-stats').innerHTML = `
     <div class="stat-card"><div class="stat-title">Total Booking</div><div class="stat-value">${tAll||0}</div></div>
     <div class="stat-card"><div class="stat-title">Menunggu Konfirmasi</div><div class="stat-value" style="color:#d9534f">${tPending||0}</div></div>
-    <div class="stat-card"><div class="stat-title">Booking Hari Ini</div><div class="stat-value" style="color:var(--bg-sidebar)">${tToday||0}</div></div>
+    <div class="stat-card"><div class="stat-title">Booking Hari Ini</div><div class="stat-value" style="color:var(--primary-hover)">${tToday||0}</div></div>
     <div class="stat-card"><div class="stat-title">Total Pelanggan</div><div class="stat-value">${tCust||0}</div></div>
   `;
 
-  // Recent Bookings
   const { data: recentRaw } = await db.from('booking').select('*, pelanggan(nama), booking_layanan(layanan(nama))').order('dibuat', {ascending: false}).limit(6);
   const recent = formatBookingData(recentRaw || []);
   $('dash-recent').innerHTML = recent.map(b=>`<tr>
-    <td><div><strong style="font-weight:600">${b.pelanggan_nama}</strong></div><div style="font-size:0.8rem;color:var(--text-muted)">${b.tanggal_fmt} | ${b.jam_fmt}</div></td>
+    <td><div><strong style="font-weight:600; color:var(--text-main);">${b.pelanggan_nama}</strong></div><div style="font-size:0.8rem;color:var(--text-muted)">${b.tanggal_fmt} | ${b.jam_fmt}</div></td>
     <td style="text-align:right">${statusBadge(b.status)}</td>
   </tr>`).join('');
 
-  // Popular Services (Ganti dengan list layanan aktif krn grouping di JS agak berat)
   const { data: services } = await db.from('layanan').select('*').eq('aktif', true).limit(5);
   $('dash-popular').innerHTML = (services||[]).map(p=>`<tr>
     <td><div style="font-size:0.9rem;font-weight:500">${p.nama}</div></td>
-    <td style="text-align:right;font-weight:600;color:var(--bg-sidebar)">Tersedia</td>
+    <td style="text-align:right;font-weight:600;color:var(--primary-hover)">Tersedia</td>
   </tr>`).join('');
 }
 
@@ -102,7 +99,7 @@ async function loadBookings() {
   allBookingsCache = formatted;
 
   $('booking-tbody').innerHTML = formatted.map(b=>`<tr>
-    <td style="font-size:0.85rem;color:var(--text-muted);font-weight:500;">${b.kode}</td>
+    <td style="font-size:0.85rem;color:var(--text-muted);font-weight:600;">${b.kode}</td>
     <td><div style="font-weight:600">${b.pelanggan_nama}</div><div style="font-size:0.8rem;color:var(--text-muted)">${b.telepon}</div></td>
     <td>${b.layanan_list.map(l=>`<span class="badge-svc">${l}</span>`).join('')}</td>
     <td>${b.tanggal_fmt}<br><span style="font-size:0.85rem;color:var(--text-muted);font-weight:500;">${b.jam_fmt} WITA</span></td>
@@ -129,9 +126,9 @@ function detailBooking(id) {
   if(!b) return;
   $('m-title').textContent = 'Reservasi ' + b.kode;
   $('m-body').innerHTML = `
-    <div class="detail-row"><div class="detail-lbl">Pelanggan</div><div class="detail-val" style="font-weight:500;">${b.pelanggan_nama} (${b.telepon})</div></div>
+    <div class="detail-row"><div class="detail-lbl">Pelanggan</div><div class="detail-val" style="font-weight:600;">${b.pelanggan_nama} (${b.telepon})</div></div>
     <div class="detail-row"><div class="detail-lbl">Layanan</div><div class="detail-val">${b.layanan_list.join('<br>')}</div></div>
-    <div class="detail-row"><div class="detail-lbl">Jadwal</div><div class="detail-val" style="font-weight:500;">${b.tanggal_fmt} pukul ${b.jam_fmt}</div></div>
+    <div class="detail-row"><div class="detail-lbl">Jadwal</div><div class="detail-val" style="font-weight:600;">${b.tanggal_fmt} pukul ${b.jam_fmt}</div></div>
     <div class="detail-row"><div class="detail-lbl">Catatan</div><div class="detail-val">${b.catatan||'-'}</div></div>
     <div class="detail-row"><div class="detail-lbl">Status</div><div class="detail-val">${statusBadge(b.status)}</div></div>
   `;
@@ -156,10 +153,11 @@ async function loadJadwal() {
   for(let i=0; i<7; i++) {
     const d = new Date(mulai+'T00:00:00'); d.setDate(d.getDate()+i); const ds = d.toISOString().split('T')[0];
     const dayData = formatData.filter(b=>b.tanggal===ds);
-    html += `<div class="sched-day"><div class="sched-header"><div>${d.toLocaleDateString('id-ID',{weekday:'long', day:'numeric', month:'long'})}</div><div style="font-size:0.85rem;color:var(--bg-sidebar)">${dayData.length} slot terisi</div></div>`;
+    // PERBAIKAN WARNA: Slot terisi menjadi warna pink utama
+    html += `<div class="sched-day"><div class="sched-header"><div>${d.toLocaleDateString('id-ID',{weekday:'long', day:'numeric', month:'long'})}</div><div style="font-size:0.85rem;color:var(--primary-hover)">${dayData.length} slot terisi</div></div>`;
     times.forEach(t => {
       const bk = dayData.find(b=>b.jam_fmt===t);
-      if(bk) html += `<div class="sched-slot" style="background:${bk.status==='confirmed'?'var(--bg-app)':'#fff'}"><div class="sched-time">${t}</div><div class="sched-info"><div style="font-weight:600">${bk.pelanggan_nama}</div><div style="font-size:0.85rem;color:var(--text-muted)">${bk.layanan_list.join(', ')}</div></div><div>${statusBadge(bk.status)}</div></div>`;
+      if(bk) html += `<div class="sched-slot" style="background:${bk.status==='confirmed'?'var(--primary-soft)':'#fff'}"><div class="sched-time">${t}</div><div class="sched-info"><div style="font-weight:600">${bk.pelanggan_nama}</div><div style="font-size:0.85rem;color:var(--text-muted)">${bk.layanan_list.join(', ')}</div></div><div>${statusBadge(bk.status)}</div></div>`;
     });
     html += `</div>`;
   }
@@ -173,14 +171,15 @@ async function loadPelanggan() {
   let filtered = data || [];
   if(cari) filtered = filtered.filter(p => p.nama.toLowerCase().includes(cari) || p.telepon.includes(cari));
 
+  // PERBAIKAN WARNA: Mengubah color teks tanggal pada badge menjadi warna gelap (text-main) atau pink (primary-hover)
   $('cust-tbody').innerHTML = filtered.map(c=>`<tr>
     <td style="font-weight:600">${c.nama}</td>
     <td>${c.telepon}</td>
-    <td><span class="badge" style="background:var(--primary-soft);color:var(--bg-sidebar);font-weight:600;">${formatDate(c.dibuat)}</span></td>
+    <td><span class="badge" style="background:var(--primary-soft);color:var(--primary-hover);font-weight:600;">${formatDate(c.dibuat)}</span></td>
   </tr>`).join('');
 }
 
-// NOTIFIKASI REAL-TIME MENGGUNAKAN SUPABASE
+// NOTIFIKASI REAL-TIME
 function setupRealtime() {
   db.channel('custom-insert-channel')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'booking' }, (payload) => {
@@ -196,5 +195,5 @@ document.addEventListener('DOMContentLoaded', () => {
   $('topbar-date').textContent = new Date().toLocaleDateString('id-ID', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
   if($('week-start')) $('week-start').value = new Date().toISOString().split('T')[0];
   loadDashboard();
-  setupRealtime(); // Aktifkan Notifikasi Realtime Otomatis!
+  setupRealtime();
 });

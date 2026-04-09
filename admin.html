@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Admin Dashboard | Room Studio</title>
 <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
 <link rel="stylesheet" href="css/admin.css"/>
 </head>
 <body>
@@ -17,31 +18,43 @@
       <div class="sidebar-logo"><img src="image/logo.jpeg" alt="Logo" style="width: 100%; height: 100%; object-fit: cover;" /></div>
       <div class="sidebar-brand">Room Studio</div>
     </div>
-    <button class="close-sidebar" onclick="toggleSidebar()">&times;</button>
+    <button class="close-sidebar" onclick="toggleSidebar()"><span class="material-symbols-outlined">close</span></button>
   </div>
   <div class="sidebar-nav">
-    <div class="nav-section">Main Menu</div>
-    <div class="nav-item active" onclick="showPanel('dashboard',this)">📊 Dashboard</div>
-    <div class="nav-item" onclick="showPanel('bookings',this)">📋 Data Booking</div>
-    <div class="nav-item" onclick="showPanel('schedule',this)">📅 Jadwal Kunjungan</div>
-    <div class="nav-item" onclick="showPanel('customers',this)">👥 Data Pelanggan</div>
+    <div class="nav-section">MAIN MENU</div>
+    <div class="nav-item active" onclick="showPanel('dashboard',this)">
+      <span class="material-symbols-outlined">space_dashboard</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="showPanel('bookings',this)">
+      <span class="material-symbols-outlined">list_alt</span> Data Booking
+    </div>
+    <div class="nav-item" onclick="showPanel('schedule',this)">
+      <span class="material-symbols-outlined">calendar_month</span> Jadwal Kunjungan
+    </div>
+    <div class="nav-item" onclick="showPanel('customers',this)">
+      <span class="material-symbols-outlined">group</span> Data Pelanggan
+    </div>
   </div>
   <div class="sidebar-footer">
     <div class="user-info">
       <div class="user-avatar" id="admin-avatar">A</div>
       <div style="font-size:0.85rem">
-        <div style="font-weight:500;color:var(--white)" id="admin-email">Admin</div>
-        <a href="index.html" target="_blank" style="color:var(--primary);text-decoration:none;font-size:0.75rem">Lihat Website ↗</a>
+        <div style="font-weight:600;color:var(--text-main)" id="admin-email">Admin</div>
+        <a href="index.html" target="_blank" style="color:var(--text-muted);text-decoration:none;font-size:0.75rem;display:flex;align-items:center;gap:3px;margin-top:2px;">
+          <span class="material-symbols-outlined" style="font-size: 14px;">language</span> Lihat Website
+        </a>
       </div>
     </div>
-    <button class="logout-btn" onclick="logout()">Keluar (Logout)</button>
+    <button class="logout-btn" onclick="logout()">
+      <span class="material-symbols-outlined" style="font-size: 18px;">logout</span> Keluar
+    </button>
   </div>
 </div>
 
 <div class="main-wrapper">
   <div class="topbar">
     <div class="topbar-left">
-      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <button class="menu-toggle" onclick="toggleSidebar()"><span class="material-symbols-outlined">menu</span></button>
       <div class="topbar-title" id="topbar-title">Dashboard Overview</div>
     </div>
     <div class="topbar-right" id="topbar-date"></div>
@@ -65,8 +78,10 @@
     <div class="panel" id="panel-bookings">
       <div class="card">
         <div class="card-header">
-          <input type="text" class="input-search" placeholder="Cari Kode RS..." id="s-booking" oninput="loadBookings()"/>
-          <input type="date" class="input-search" id="s-tgl" onchange="loadBookings()"/>
+          <div style="display:flex; gap:0.5rem; align-items:center; width:100%; max-width:400px;">
+             <input type="text" class="input-search" placeholder="Cari Kode RS..." id="s-booking" oninput="loadBookings()"/>
+             <input type="date" class="input-search" id="s-tgl" onchange="loadBookings()"/>
+          </div>
           <div class="filter-group">
             <button class="btn-filter active" onclick="setFilter('all',this)">Semua</button>
             <button class="btn-filter" onclick="setFilter('pending',this)">Pending</button>
@@ -86,10 +101,10 @@
     <div class="panel" id="panel-schedule">
       <div class="panel-schedule-controls" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;color:var(--text-muted)">
         <div>Menampilkan jadwal 7 hari.</div>
-        <div style="display:flex;gap:0.5rem;">
-          <button class="btn btn-detail" onclick="shiftWeek(-7)">← Prev</button>
+        <div style="display:flex;gap:0.5rem; align-items:center;">
+          <button class="btn btn-detail" style="display:flex;align-items:center;" onclick="shiftWeek(-7)"><span class="material-symbols-outlined" style="font-size:18px">chevron_left</span> Prev</button>
           <input type="date" class="input-search" id="week-start" onchange="loadJadwal()" style="padding:0.4rem 1rem; width:auto;"/>
-          <button class="btn btn-detail" onclick="shiftWeek(7)">Next →</button>
+          <button class="btn btn-detail" style="display:flex;align-items:center;" onclick="shiftWeek(7)">Next <span class="material-symbols-outlined" style="font-size:18px">chevron_right</span></button>
         </div>
       </div>
       <div id="sched-week"></div>
@@ -113,7 +128,7 @@
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="m-title">Detail</div>
-      <button style="border:none;background:none;font-size:1.8rem;cursor:pointer;color:var(--text-muted);line-height:1;" onclick="closeModal()">&times;</button>
+      <button style="border:none;background:none;cursor:pointer;color:var(--text-muted);display:flex;align-items:center;" onclick="closeModal()"><span class="material-symbols-outlined">close</span></button>
     </div>
     <div class="modal-body" id="m-body"></div>
     <div class="modal-footer" id="m-foot"></div>
