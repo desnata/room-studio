@@ -442,7 +442,15 @@ footer a:hover{color:var(--accent-pink)}
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
+// 1. INISIALISASI SUPABASE
+const supabaseUrl = 'https://vhsrmfmvblfqolhwgwbt.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoc3JtZm12YmxmcW9saHdnd2J0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2ODQ4NjAsImV4cCI6MjA5MTI2MDg2MH0.jxVo-xAjpEyaqGiROMlWbdwmCga6GKNz_rnNrRYPpWQ';
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+// 2. VARIABEL GLOBAL & KONTEN TEKS
 let allLayanan = [];
 let selectedServices = new Set();
 let uniqueCategories = [];
@@ -461,60 +469,72 @@ const categoryDescriptions = {
 };
 
 const specificServiceDescriptions = {
-  // ==========================================
-  // KATEGORI: EYELASH
-  // ==========================================
-  'Natural Lash': 'Pemasangan bulu mata yang terlihat seperti bulu mata asli, sangat natural dan ringan untuk sehari-hari.',
-  'Standar Lash': 'Pemasangan bulu mata dengan ketebalan standar untuk tampilan lentik yang pas dan tidak berlebihan.',
+  'Natural Lash': 'Pemasangan bulu mata yang terlihat seperti bulu mata asli, sangat natural dan ringan.',
+  'Standar Lash': 'Pemasangan bulu mata dengan ketebalan standar untuk tampilan lentik yang pas.',
   'Volume Lash': 'Teknik pemasangan bulu mata bercabang untuk hasil yang lebih penuh, tebal, dan dramatis.',
-  'Wispy Lash': 'Gaya pemasangan dengan panjang bulu mata yang bervariasi, memberikan efek mata yang cantik dan bertekstur (spiky).',
-  'Anime Lash': 'Gaya bulu mata populer yang menyerupai karakter anime, dengan helai-helai tebal terpusat yang mempesona.',
-  'Cat Eye Lash': 'Pemasangan dengan bulu mata yang lebih panjang di ujung luar mata, memberikan efek mata kucing yang menggoda.',
-  'Remove': 'Pelepasan bulu mata extension lama secara aman dan tanpa rasa sakit oleh tenaga profesional.',
-  'Retouch': 'Pengisian kembali area bulu mata extension yang sudah rontok agar kembali rapi dan penuh (untuk perawatan rutin).',
-
-  // ==========================================
-  // KATEGORI: NAIL
-  // ==========================================
-  'Menicure': 'Perawatan esensial untuk membersihkan kutikula, membentuk kuku, dan membuat jari tangan tampak bersih dan terawat.',
-  'Pedicure': 'Perawatan relaksasi untuk kaki, membersihkan kulit mati, dan merapikan kuku jari kaki Anda.',
-  'Pedicure+Callus': 'Paket pedicure lengkap ditambah perawatan khusus untuk mengangkat kapalan (callus) pada telapak kaki hingga mulus.',
-  'Classic Gel Hand': 'Aplikasi pewarnaan kuku dengan cat gel pada tangan. Menghasilkan warna solid, mengkilap, dan sangat awet.',
-  'Classic Gel Feet': 'Aplikasi pewarnaan kuku dengan cat gel pada kaki untuk tampilan yang senantiasa rapi dan tahan lama.',
-  'French Nail': 'Gaya kuku klasik dengan ujung kuku berwarna putih dan dasar berwarna natural, cocok untuk segala acara.',
-  'Ombré Nail': 'Teknik pewarnaan kuku dengan gradasi dua warna yang menyatu secara halus dan modern.',
-  'Cat Eye': 'Teknik pewarnaan gel khusus menggunakan magnet untuk menciptakan efek garis cahaya berkilau layaknya mata kucing.',
-  'Acrylic Ext': 'Pemanjangan kuku buatan menggunakan bahan acrylic yang kuat untuk hasil kuku yang lebih panjang dan kokoh.',
-  'Half Ext': 'Pemanjangan kuku hanya pada bagian setengah ujung kuku (half tip) untuk menambah sedikit panjang secara instan.',
-  'Full Ext': 'Pemanjangan kuku penuh menutupi seluruh kuku asli untuk merubah bentuk dan panjang kuku sepenuhnya.',
-  'Remove Gel': 'Pembersihan cat kuku gel lama secara profesional dan aman, dihitung per jari.',
-  'Remove Ext': 'Pelepasan kuku sambung (extension) lama menggunakan cairan khusus agar tidak merusak kuku asli, dihitung per jari.',
-  'Art 1pcs': 'Penambahan seni lukis kuku/hiasan (nail art) yang cantik dan mendetail untuk 1 jari tangan Anda.',
-  'Art 2pcs': 'Penambahan seni lukis kuku/hiasan (nail art) yang cantik dan mendetail untuk 2 jari tangan Anda.',
-  'Art 4pcs': 'Penambahan seni lukis kuku/hiasan (nail art) yang cantik dan mendetail untuk 4 jari tangan Anda.',
-  'Overlay': 'Lapisan pelindung tambahan bening di atas kuku asli agar kuku menjadi lebih keras, tebal, dan tidak mudah patah.',
-
-  // ==========================================
-  // KATEGORI: HAIR SERVICE
-  // ==========================================
-  'Hair Wash': 'Pencucian rambut yang menenangkan menggunakan sampo premium, mengembalikan kesegaran kulit kepala.',
-  'Hair Wash + Mask Biasa': 'Paket cuci rambut dilanjutkan dengan aplikasi masker rambut standar untuk menutrisi dan melembutkan.',
-  'Hair Wash + Mask Merek': 'Paket cuci rambut dengan masker rambut bermerek kualitas premium untuk hasil perawatan yang lebih maksimal.',
-  'Wash + Mask B + Catok': 'Paket lengkap: Cuci rambut, masker rambut biasa, dan ditata lurus atau curly menggunakan catokan.',
-  'Wash + Mask M + Catok': 'Paket premium: Cuci rambut, masker bermerek kualitas salon, dan ditata lurus atau curly menggunakan catokan.',
-  'Hair Wash + Catok': 'Pencucian rambut yang menyegarkan dilanjutkan dengan penataan rambut menggunakan catokan (lurus/curly).',
-  'Catok Only': 'Layanan khusus penataan rambut menggunakan catokan, meluruskan atau mengeriting rambut secara instan.',
-  'Creambath Biasa': 'Perawatan relaksasi rambut dan kulit kepala disertai pijatan ringan menggunakan krim standar.',
-  'Creambath Merek': 'Perawatan relaksasi rambut premium menggunakan produk creambath bermerek untuk menutrisi rambut lebih dalam.',
-  'Creambath B + Catok': 'Paket creambath standar yang diakhiri dengan penataan rambut menggunakan catokan.',
-  'Creambath M + Catok': 'Paket relaksasi creambath produk bermerek yang diakhiri dengan penataan rambut paripurna menggunakan catokan.'
+  'Wispy Lash': 'Gaya pemasangan dengan panjang bulu mata yang bervariasi.',
+  'Anime Lash': 'Gaya bulu mata populer yang menyerupai karakter anime.',
+  'Cat Eye Lash': 'Pemasangan dengan bulu mata yang lebih panjang di ujung luar mata.',
+  'Remove': 'Pelepasan bulu mata extension lama secara aman.',
+  'Retouch': 'Pengisian kembali area bulu mata extension yang sudah rontok.',
+  'Menicure': 'Perawatan esensial untuk membersihkan kutikula dan kuku tangan.',
+  'Pedicure': 'Perawatan relaksasi untuk kaki dan merapikan kuku jari kaki.',
+  'Pedicure+Callus': 'Paket pedicure lengkap ditambah perawatan mengangkat kapalan.',
+  'Classic Gel Hand': 'Aplikasi pewarnaan kuku dengan cat gel pada tangan.',
+  'Classic Gel Feet': 'Aplikasi pewarnaan kuku dengan cat gel pada kaki.',
+  'French Nail': 'Gaya kuku klasik dengan ujung kuku berwarna putih.',
+  'Ombré Nail': 'Teknik pewarnaan kuku dengan gradasi dua warna.',
+  'Cat Eye': 'Teknik pewarnaan gel khusus dengan efek mata kucing.',
+  'Acrylic Ext': 'Pemanjangan kuku buatan menggunakan bahan acrylic.',
+  'Half Ext': 'Pemanjangan kuku hanya pada bagian setengah ujung kuku.',
+  'Full Ext': 'Pemanjangan kuku penuh menutupi seluruh kuku asli.',
+  'Remove Gel': 'Pembersihan cat kuku gel lama secara profesional.',
+  'Remove Ext': 'Pelepasan kuku sambung (extension) lama.',
+  'Art 1pcs': 'Penambahan seni lukis kuku/hiasan untuk 1 jari.',
+  'Art 2pcs': 'Penambahan seni lukis kuku/hiasan untuk 2 jari.',
+  'Art 4pcs': 'Penambahan seni lukis kuku/hiasan untuk 4 jari.',
+  'Overlay': 'Lapisan pelindung tambahan bening di atas kuku asli.',
+  'Hair Wash': 'Pencucian rambut yang menenangkan menggunakan sampo premium.',
+  'Hair Wash + Mask Biasa': 'Paket cuci rambut dilanjutkan dengan aplikasi masker.',
+  'Hair Wash + Mask Merek': 'Paket cuci rambut dengan masker rambut bermerek.',
+  'Wash + Mask B + Catok': 'Paket lengkap: Cuci rambut, masker biasa, dan ditata.',
+  'Wash + Mask M + Catok': 'Paket premium: Cuci rambut, masker bermerek, dan ditata.',
+  'Hair Wash + Catok': 'Pencucian rambut dilanjutkan dengan penataan rambut.',
+  'Catok Only': 'Layanan khusus penataan rambut menggunakan catokan.',
+  'Creambath Biasa': 'Perawatan relaksasi rambut dan kulit kepala.',
+  'Creambath Merek': 'Perawatan relaksasi rambut premium bermerek.',
+  'Creambath B + Catok': 'Paket creambath standar diakhiri dengan catokan.',
+  'Creambath M + Catok': 'Paket relaksasi creambath produk bermerek diakhiri catokan.'
 };
 
+function formatHarga(min, max, satuan) {
+  const fmt = n => 'Rp ' + parseInt(n).toLocaleString('id-ID');
+  if (satuan === '(add)') return 'add ' + fmt(min);
+  let base = max ? fmt(min) + ' – ' + fmt(max) : fmt(min);
+  return satuan ? base + ' ' + satuan : base;
+}
+
+// 3. MENGAMBIL DATA DARI SUPABASE
 async function loadLayanan() {
-  const res = await fetch('api.php?action=get_layanan');
-  const j   = await res.json();
-  if (!j.success) return;
-  allLayanan = j.data;
+  const { data, error } = await supabase
+    .from('layanan')
+    .select('*, kategori(nama, urutan)')
+    .eq('aktif', true);
+
+  if (error) {
+    console.error("Gagal memuat data dari Supabase:", error);
+    document.getElementById('kat-view').innerHTML = `<p style="color:red; text-align:center;">Gagal memuat data. Pastikan RLS di Supabase sudah dimatikan.</p>`;
+    return;
+  }
+
+  allLayanan = data.map(l => ({
+    id: l.id,
+    nama: l.nama,
+    kategori: l.kategori ? l.kategori.nama : 'Lainnya',
+    harga_display: formatHarga(l.harga_min, l.harga_max, l.satuan),
+    urutan_kategori: l.kategori ? l.kategori.urutan : 99,
+    harga_min: l.harga_min
+  })).sort((a, b) => a.urutan_kategori - b.urutan_kategori);
 
   uniqueCategories = [...new Set(allLayanan.map(l => l.kategori))];
   
@@ -522,23 +542,19 @@ async function loadLayanan() {
   renderPriceList(allLayanan); 
 }
 
+// 4. FUNGSI TAMPILAN (UI)
 function showCategories() {
   document.getElementById('kat-view').style.display = 'grid';
   document.getElementById('svc-view').style.display = 'none';
   document.getElementById('section-subtitle').textContent = 'Silakan pilih kategori perawatan yang Anda butuhkan.';
   
-  const catsToShow = uniqueCategories.slice(0, 3);
   const katView = document.getElementById('kat-view');
-  
-  katView.innerHTML = catsToShow.map(cat => {
+  katView.innerHTML = uniqueCategories.map(cat => {
     let imgSrc = sampleImages[cat] || defaultImg;
     let desc = categoryDescriptions[cat] || 'Perawatan kecantikan eksklusif untuk hasil sempurna dan memuaskan.';
-
     return `
       <div class="kat-card" onclick="showServices('${cat}')">
-        <div class="kat-img">
-          <img src="${imgSrc}" alt="${cat}" />
-        </div>
+        <div class="kat-img"><img src="${imgSrc}" alt="${cat}" /></div>
         <div class="kat-title">${cat}</div>
         <div class="kat-desc" style="padding: 0 1.5rem 1.5rem 1.5rem; text-align: center; font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; font-weight: 300;">${desc}</div>
       </div>
@@ -553,13 +569,10 @@ function showServices(catName) {
   document.getElementById('section-subtitle').textContent = `Pilih layanan dari menu ${catName}. Anda bisa memilih lebih dari satu.`;
   
   const list = allLayanan.filter(l => l.kategori === catName);
-  const svcContainer = document.getElementById('svc-list');
-  
-  svcContainer.innerHTML = list.map(l => {
+  document.getElementById('svc-list').innerHTML = list.map(l => {
     let desc = specificServiceDescriptions[l.nama] || categoryDescriptions[catName] || 'Perawatan kecantikan eksklusif untuk hasil terbaik.';
     return `
-    <div class="svc-item ${selectedServices.has(l.id) ? 'selected' : ''}" 
-      id="svc-${l.id}" onclick="toggleService(${l.id})">
+    <div class="svc-item ${selectedServices.has(l.id) ? 'selected' : ''}" id="svc-${l.id}" onclick="toggleService(${l.id})">
       <div class="svc-item-name">${l.nama}</div>
       <div class="svc-item-desc">${desc}</div>
     </div>
@@ -568,8 +581,7 @@ function showServices(catName) {
 
 function renderPriceList(list) {
   const cats = [...new Set(list.map(l => l.kategori))];
-  const g = document.getElementById('price-grid');
-  g.innerHTML = cats.map(cat => `
+  document.getElementById('price-grid').innerHTML = cats.map(cat => `
     <div class="price-block">
       <div class="price-block-head">${cat}</div>
       ${list.filter(l => l.kategori === cat).map(l => `
@@ -581,17 +593,11 @@ function renderPriceList(list) {
 }
 
 function toggleService(id) {
-  if (selectedServices.has(id)) {
-    selectedServices.delete(id);
-  } else {
-    selectedServices.add(id);
-  }
+  if (selectedServices.has(id)) selectedServices.delete(id);
+  else selectedServices.add(id);
   
   const itemEl = document.getElementById(`svc-${id}`);
-  if (itemEl) {
-    itemEl.classList.toggle('selected', selectedServices.has(id));
-  }
-  
+  if (itemEl) itemEl.classList.toggle('selected', selectedServices.has(id));
   updateSelectedPanel();
 }
 
@@ -613,130 +619,7 @@ function clearAllServices() {
   updateSelectedPanel();
 }
 
-async function cekSlot() {
-  const tgl = document.getElementById('f-tanggal').value;
-  const jam = document.getElementById('f-jam').value;
-  const hint = document.getElementById('slot-hint');
-  if (!tgl || !jam) { hint.textContent = ''; return; }
-
-  hint.textContent = 'Memeriksa ketersediaan...';
-  hint.className = 'hint';
-  const res = await fetch(`api.php?action=cek_slot&tanggal=${tgl}&jam=${jam}`);
-  const j = await res.json();
-  if (j.data?.tersedia) {
-    hint.textContent = '✓ Jadwal tersedia'; hint.className = 'hint ok';
-  } else {
-    hint.textContent = '✕ Jadwal penuh. Silakan pilih waktu lain.'; hint.className = 'hint err';
-  }
-}
-
-async function submitBooking() {
-  const nama = document.getElementById('f-nama').value.trim();
-  const telepon = document.getElementById('f-telepon').value.trim();
-  const tanggal = document.getElementById('f-tanggal').value;
-  const jam = document.getElementById('f-jam').value;
-  const catatan = document.getElementById('f-catatan').value.trim();
-
-  if (!nama || !telepon || selectedServices.size === 0 || !tanggal || !jam) {
-    showToast('Lengkapi formulir dan pastikan Anda telah memilih layanan', 'err'); return;
-  }
-
-  const btn = document.getElementById('btn-submit');
-  btn.disabled = true; document.getElementById('btn-text').textContent = 'Memproses...';
-
-  const fd = new FormData();
-  fd.append('action', 'buat_booking');
-  fd.append('nama', nama); fd.append('telepon', telepon);
-  fd.append('tanggal', tanggal); fd.append('jam', jam); fd.append('catatan', catatan);
-  selectedServices.forEach(id => fd.append('layanan_ids[]', id));
-
-  const res = await fetch('api.php', { method: 'POST', body: fd });
-  const j = await res.json();
-
-  btn.disabled = false; document.getElementById('btn-text').textContent = 'Konfirmasi Reservasi';
-
-  if (j.success) {
-    document.getElementById('form-section').style.display = 'none';
-    document.getElementById('selected-panel').style.display = 'none';
-    const sc = document.getElementById('success-card');
-    sc.classList.add('show');
-    document.getElementById('success-kode').textContent = j.data.kode;
-    document.getElementById('success-layanan').textContent = j.data.layanan.join(', ');
-    sc.scrollIntoView({ behavior: 'smooth' });
-    showToast('Reservasi berhasil dibuat!', 'ok');
-  } else {
-    showToast(j.message, 'err');
-  }
-}
-
-function resetForm() {
-  document.getElementById('success-card').classList.remove('show');
-  document.getElementById('form-section').style.display = '';
-  document.getElementById('selected-panel').style.display = '';
-  ['f-nama','f-telepon','f-catatan','f-tanggal','f-jam'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('slot-hint').textContent = '';
-  clearAllServices();
-  showCategories();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function showToast(msg, type = '') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'toast ' + type + ' show';
-  setTimeout(() => t.classList.remove('show'), 4000);
-}
-
-document.getElementById('f-tanggal').min = new Date().toISOString().split('T')[0];
-loadLayanan();
-</script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script>
-  // 1. INISIALISASI SUPABASE (GANTI DENGAN KODE DARI DASHBOARD SUPABASE KAMU)
-const supabaseUrl = 'https://vhsrmfmvblfqolhwgwbt.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoc3JtZm12YmxmcW9saHdnd2J0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2ODQ4NjAsImV4cCI6MjA5MTI2MDg2MH0.jxVo-xAjpEyaqGiROMlWbdwmCga6GKNz_rnNrRYPpWQ';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-// [TETAPKAN KODE sampleImages, categoryDescriptions, dan specificServiceDescriptions KAMU DI SINI, SAYA HAPUS AGAR TIDAK KEPANJANGAN]
-
-// Fungsi bantuan format harga (menggantikan fungsi PHP)
-function formatHarga(min, max, satuan) {
-  const fmt = n => 'Rp ' + parseInt(n).toLocaleString('id-ID');
-  if (satuan === '(add)') return 'add ' + fmt(min);
-  let base = max ? fmt(min) + ' – ' + fmt(max) : fmt(min);
-  return satuan ? base + ' ' + satuan : base;
-}
-
-// 3. MENGAMBIL DATA LAYANAN
-async function loadLayanan() {
-  const { data, error } = await supabase
-    .from('layanan')
-    .select('*, kategori:kategori_id(nama, urutan)')
-    .eq('aktif', true);
-
-  if (error) {
-    console.error("Gagal memuat data", error);
-    return;
-  }
-
-  // Format data agar sama seperti struktur PHP sebelumnya
-  allLayanan = data.map(l => ({
-    id: l.id,
-    nama: l.nama,
-    kategori: l.kategori.nama,
-    harga_display: formatHarga(l.harga_min, l.harga_max, l.satuan),
-    urutan_kategori: l.kategori.urutan,
-    harga_min: l.harga_min
-  })).sort((a, b) => a.urutan_kategori - b.urutan_kategori);
-
-  uniqueCategories = [...new Set(allLayanan.map(l => l.kategori))];
-  showCategories();
-  renderPriceList(allLayanan); 
-}
-
-// [TETAPKAN FUNGSI showCategories, showServices, renderPriceList, toggleService, updateSelectedPanel, clearAllServices DI SINI (TIDAK PERLU DIUBAH)]
-
-// 4. CEK KETERSEDIAAN JADWAL
+// 5. TRANSAKSI KE SUPABASE
 async function cekSlot() {
   const tgl = document.getElementById('f-tanggal').value;
   const jam = document.getElementById('f-jam').value;
@@ -760,7 +643,6 @@ async function cekSlot() {
   }
 }
 
-// 5. PROSES SUBMIT BOOKING (MENGGANTIKAN api.php?action=buat_booking)
 async function submitBooking() {
   const nama = document.getElementById('f-nama').value.trim();
   const telepon = document.getElementById('f-telepon').value.trim();
@@ -776,24 +658,20 @@ async function submitBooking() {
   btn.disabled = true; document.getElementById('btn-text').textContent = 'Memproses...';
 
   try {
-    // A. Cek atau Buat Pelanggan
     let pelangganId;
     const { data: existUser } = await supabase.from('pelanggan').select('id').eq('telepon', telepon).single();
     
     if (existUser) {
       pelangganId = existUser.id;
-      // Update nama jika berubah
       await supabase.from('pelanggan').update({ nama: nama }).eq('id', pelangganId);
     } else {
       const { data: newUser } = await supabase.from('pelanggan').insert([{ nama, telepon }]).select().single();
       pelangganId = newUser.id;
     }
 
-    // B. Buat Kode Booking
     const randomCode = Math.floor(1000 + Math.random() * 9000);
     const kodeBooking = 'RS-' + randomCode;
 
-    // C. Insert ke Tabel Booking
     const { data: newBooking, error: errBooking } = await supabase
       .from('booking')
       .insert([{
@@ -807,19 +685,13 @@ async function submitBooking() {
 
     if (errBooking) throw errBooking;
 
-    // D. Insert Layanan yang Dipilih
     const layananToInsert = Array.from(selectedServices).map(id => {
       const svc = allLayanan.find(l => l.id === id);
-      return {
-        booking_id: newBooking.id,
-        layanan_id: id,
-        harga_saat_booking: svc.harga_min
-      };
+      return { booking_id: newBooking.id, layanan_id: id, harga_saat_booking: svc.harga_min };
     });
 
     await supabase.from('booking_layanan').insert(layananToInsert);
 
-    // BERHASIL
     btn.disabled = false; document.getElementById('btn-text').textContent = 'Konfirmasi Reservasi';
     
     document.getElementById('form-section').style.display = 'none';
@@ -837,12 +709,28 @@ async function submitBooking() {
   } catch (err) {
     console.error(err);
     btn.disabled = false; document.getElementById('btn-text').textContent = 'Konfirmasi Reservasi';
-    showToast('Terjadi kesalahan sistem, silakan coba lagi.', 'err');
+    showToast('Terjadi kesalahan sistem. Pastikan RLS Supabase dimatikan.', 'err');
   }
 }
 
-// [TETAPKAN FUNGSI resetForm dan showToast DI SINI]
+function resetForm() {
+  document.getElementById('success-card').classList.remove('show');
+  document.getElementById('form-section').style.display = '';
+  document.getElementById('selected-panel').style.display = '';
+  ['f-nama','f-telepon','f-catatan','f-tanggal','f-jam'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('slot-hint').textContent = '';
+  clearAllServices();
+  showCategories();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+// Inisialisasi
 document.getElementById('f-tanggal').min = new Date().toISOString().split('T')[0];
 loadLayanan();
 </script>
