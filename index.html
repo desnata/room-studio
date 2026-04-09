@@ -516,32 +516,24 @@ function formatHarga(min, max, satuan) {
 
 // 3. MENGAMBIL DATA DARI SUPABASE
 async function loadLayanan() {
-  console.log("1. Sedang mencoba menghubungi Supabase...");
-
-  // Menggunakan format relasi eksplisit (kategori:kategori_id) agar tidak error
+  console.log("Mencoba mengambil data dari Supabase...");
   const { data, error } = await supabase
     .from('layanan')
     .select('*, kategori:kategori_id(nama, urutan)')
     .eq('aktif', true);
 
-  // Jika koneksi gagal atau query salah, pop-up akan muncul!
   if (error) {
     console.error("ERROR SUPABASE:", error);
-    alert("GAGAL MENGAMBIL DATA DARI SUPABASE!\nPesan: " + error.message);
+    alert("GAGAL MENGAMBIL DATA!\nPesan Error: " + error.message);
     document.getElementById('kat-view').innerHTML = `<p style="color:red; text-align:center;">Gagal memuat data. Cek Console.</p>`;
     return;
   }
 
-  console.log("2. Data berhasil ditarik:", data);
-
-  // Jika koneksi berhasil tapi tabel masih kosong
   if (!data || data.length === 0) {
-    alert("KONEKSI BERHASIL, TAPI DATA LAYANAN KOSONG!\nPastikan kamu sudah menjalankan kode SQL INSERT di Supabase.");
     document.getElementById('kat-view').innerHTML = `<p style="text-align:center;">Belum ada data layanan.</p>`;
     return;
   }
 
-  // Memproses data jika berhasil
   allLayanan = data.map(l => ({
     id: l.id,
     nama: l.nama,
@@ -555,7 +547,6 @@ async function loadLayanan() {
   
   showCategories();
   renderPriceList(allLayanan); 
-  console.log("3. Tampilan berhasil diperbarui!");
 }
 
 // 4. FUNGSI TAMPILAN (UI)
