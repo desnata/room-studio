@@ -14,7 +14,7 @@ let uniqueCategories = [];
 
 // KAMUS GAMBAR & DESKRIPSI
 const sampleImages = {'Eyelash': 'image/Eyelash.jpg', 'Nail': 'image/Nail.jpg'};
-const sampleImage = 'image/Latar.jpg';
+const sampleImage = 'image/Desain tanpa judul.jpg';
 
 const categoryDescriptions = {
   'Eyelash': 'Perawatan bulu mata eksklusif untuk tampilan lentik, bervolume natural, dan tahan lama.',
