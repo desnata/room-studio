@@ -13,13 +13,12 @@ let selectedServices = new Set();
 let uniqueCategories = [];
 
 // KAMUS GAMBAR & DESKRIPSI
-const sampleImages = {'Eyelash': 'image/Eyelash.jpg', 'Nail': 'image/Nail.jpg', 'Hair Service': 'image/Hair.jpg'};
+const sampleImages = {'Eyelash': 'image/Eyelash.jpg', 'Nail': 'image/Nail.jpg'};
 const sampleImage = 'image/Latar.jpg';
 
 const categoryDescriptions = {
   'Eyelash': 'Perawatan bulu mata eksklusif untuk tampilan lentik, bervolume natural, dan tahan lama.',
   'Nail': 'Perawatan esensial dan seni kuku (Manicure/Pedicure, Gel Paint, Extension) untuk kuku cantik yang merefleksikan gaya Anda.',
-  'Hair Service': 'Layanan rambut lengkap (Cutting, Styling, Coloring, Treatment intensif) untuk menjaga kesehatan dan keindahan mahkota Anda.',
 };
 
 const specificServiceDescriptions = {
@@ -48,17 +47,6 @@ const specificServiceDescriptions = {
   'Art 2pcs': 'Penambahan seni lukis kuku/hiasan untuk 2 jari.',
   'Art 4pcs': 'Penambahan seni lukis kuku/hiasan untuk 4 jari.',
   'Overlay': 'Lapisan pelindung tambahan bening di atas kuku asli.',
-  'Hair Wash': 'Pencucian rambut yang menenangkan menggunakan sampo premium.',
-  'Hair Wash + Mask Biasa': 'Paket cuci rambut dilanjutkan dengan aplikasi masker.',
-  'Hair Wash + Mask Merek': 'Paket cuci rambut dengan masker rambut bermerek.',
-  'Wash + Mask B + Catok': 'Paket lengkap: Cuci rambut, masker biasa, dan ditata.',
-  'Wash + Mask M + Catok': 'Paket premium: Cuci rambut, masker bermerek, dan ditata.',
-  'Hair Wash + Catok': 'Pencucian rambut dilanjutkan dengan penataan rambut.',
-  'Catok Only': 'Layanan khusus penataan rambut menggunakan catokan.',
-  'Creambath Biasa': 'Perawatan relaksasi rambut dan kulit kepala.',
-  'Creambath Merek': 'Perawatan relaksasi rambut premium bermerek.',
-  'Creambath B + Catok': 'Paket creambath standar diakhiri dengan catokan.',
-  'Creambath M + Catok': 'Paket relaksasi creambath produk bermerek diakhiri catokan.'
 };
 
 function formatHarga(min, max, satuan) {
