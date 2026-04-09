@@ -516,42 +516,46 @@ function formatHarga(min, max, satuan) {
 
 // 3. MENGAMBIL DATA DARI SUPABASE
 async function loadLayanan() {
-  console.log("Sedang mencoba mengambil data dari Supabase...");
+  console.log("1. Sedang mencoba menghubungi Supabase...");
 
-  // KITA UBAH QUERY-NYA SEMENTARA UNTUK MENCEGAH ERROR RELASI TABEL
+  // Menggunakan format relasi eksplisit (kategori:kategori_id) agar tidak error
   const { data, error } = await supabase
     .from('layanan')
-    .select('*') 
+    .select('*, kategori:kategori_id(nama, urutan)')
     .eq('aktif', true);
 
-  // JIKA ADA ERROR DARI SUPABASE, MUNCULKAN POP-UP!
+  // Jika koneksi gagal atau query salah, pop-up akan muncul!
   if (error) {
     console.error("ERROR SUPABASE:", error);
-    alert("GAGAL MENGAMBIL DATA!\nPesan Error: " + error.message + "\nHint: " + error.hint);
+    alert("GAGAL MENGAMBIL DATA DARI SUPABASE!\nPesan: " + error.message);
+    document.getElementById('kat-view').innerHTML = `<p style="color:red; text-align:center;">Gagal memuat data. Cek Console.</p>`;
     return;
   }
 
-  console.log("DATA BERHASIL DIAMBIL:", data);
+  console.log("2. Data berhasil ditarik:", data);
 
-  // JIKA DATA KOSONG
+  // Jika koneksi berhasil tapi tabel masih kosong
   if (!data || data.length === 0) {
-    alert("KONEKSI BERHASIL, TAPI DATA KOSONG!\nPastikan kamu sudah klik tombol 'Run' pada kode SQL untuk memasukkan data (INSERT) di dashboard Supabase.");
+    alert("KONEKSI BERHASIL, TAPI DATA LAYANAN KOSONG!\nPastikan kamu sudah menjalankan kode SQL INSERT di Supabase.");
+    document.getElementById('kat-view').innerHTML = `<p style="text-align:center;">Belum ada data layanan.</p>`;
     return;
   }
 
-  // JIKA BERHASIL (Menggunakan fallback kategori sementara)
+  // Memproses data jika berhasil
   allLayanan = data.map(l => ({
     id: l.id,
     nama: l.nama,
-    kategori: 'Semua Perawatan', // Tampilkan semua di 1 kategori dulu
+    kategori: l.kategori ? l.kategori.nama : 'Lainnya',
     harga_display: formatHarga(l.harga_min, l.harga_max, l.satuan),
-    urutan_kategori: 1,
+    urutan_kategori: l.kategori ? l.kategori.urutan : 99,
     harga_min: l.harga_min
-  }));
+  })).sort((a, b) => a.urutan_kategori - b.urutan_kategori);
 
-  uniqueCategories = ['Semua Perawatan'];
+  uniqueCategories = [...new Set(allLayanan.map(l => l.kategori))];
+  
   showCategories();
   renderPriceList(allLayanan); 
+  console.log("3. Tampilan berhasil diperbarui!");
 }
 
 // 4. FUNGSI TAMPILAN (UI)
