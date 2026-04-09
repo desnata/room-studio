@@ -12,7 +12,7 @@ let allLayanan = [];
 let selectedServices = new Set();
 let uniqueCategories = [];
 
-// KAMUS GAMBAR & DESKRIPSI (DIKEMBALIKAN SEPERTI SEMULA)
+// KAMUS GAMBAR & DESKRIPSI
 const sampleImages = {'Eyelash': 'image/Eyelash.jpg', 'Nail': 'image/Nail.jpg', 'Hair Service': 'image/Hair.jpg'};
 const sampleImage = 'image/Latar.jpg';
 
