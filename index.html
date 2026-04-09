@@ -319,37 +319,49 @@ function formatHarga(min, max, satuan) {
 
 // 3. MENGAMBIL DATA DARI SUPABASE
 async function loadLayanan() {
-  console.log("Mencoba mengambil data dari Supabase...");
-  const { data, error } = await supabase
-    .from('layanan')
-    .select('*, kategori:kategori_id(nama, urutan)')
-    .eq('aktif', true);
+  try {
+    document.getElementById('kat-view').innerHTML = `<p style="text-align:center;">Menghubungi Supabase...</p>`;
 
-  if (error) {
-    console.error("ERROR SUPABASE:", error);
-    alert("GAGAL MENGAMBIL DATA!\nPesan Error: " + error.message);
-    document.getElementById('kat-view').innerHTML = `<p style="color:red; text-align:center;">Gagal memuat data. Cek Console.</p>`;
-    return;
+    // Kita gunakan query paling sederhana tanpa relasi untuk menghindari error
+    const { data, error } = await supabase
+      .from('layanan')
+      .select('*');
+
+    // JIKA ADA ERROR DARI SUPABASE
+    if (error) {
+      document.getElementById('kat-view').innerHTML = `<div style="background:#fee; padding:20px; border-radius:10px; color:red; text-align:center;">
+        <strong>KONEKSI SUPABASE GAGAL!</strong><br>
+        Pesan Error: ${error.message}
+      </div>`;
+      return;
+    }
+
+    // JIKA DATA KOSONG
+    if (!data || data.length === 0) {
+      document.getElementById('kat-view').innerHTML = `<div style="background:#fff3cd; padding:20px; border-radius:10px; color:#856404; text-align:center;">
+        <strong>KONEKSI SUKSES, TAPI DATA KOSONG!</strong><br>
+        Silakan buka Dashboard Supabase, masuk ke SQL Editor, dan pastikan Anda sudah menjalankan kode INSERT untuk memasukkan data layanan.
+      </div>`;
+      return;
+    }
+
+    // JIKA BERHASIL (Meskipun tanpa relasi tabel kategori)
+    allLayanan = data.map(l => ({
+      id: l.id,
+      nama: l.nama,
+      kategori: 'Perawatan Salon', // Digabung sementara karena kita matikan relasi
+      harga_display: formatHarga(l.harga_min, l.harga_max, l.satuan),
+      urutan_kategori: 1,
+      harga_min: l.harga_min
+    }));
+
+    uniqueCategories = ['Perawatan Salon'];
+    showCategories();
+    renderPriceList(allLayanan); 
+
+  } catch (err) {
+    document.getElementById('kat-view').innerHTML = `<p style="color:red; text-align:center;">Terjadi Kesalahan Sistem: ${err.message}</p>`;
   }
-
-  if (!data || data.length === 0) {
-    document.getElementById('kat-view').innerHTML = `<p style="text-align:center;">Belum ada data layanan.</p>`;
-    return;
-  }
-
-  allLayanan = data.map(l => ({
-    id: l.id,
-    nama: l.nama,
-    kategori: l.kategori ? l.kategori.nama : 'Lainnya',
-    harga_display: formatHarga(l.harga_min, l.harga_max, l.satuan),
-    urutan_kategori: l.kategori ? l.kategori.urutan : 99,
-    harga_min: l.harga_min
-  })).sort((a, b) => a.urutan_kategori - b.urutan_kategori);
-
-  uniqueCategories = [...new Set(allLayanan.map(l => l.kategori))];
-  
-  showCategories();
-  renderPriceList(allLayanan); 
 }
 
 // 4. FUNGSI TAMPILAN (UI)
