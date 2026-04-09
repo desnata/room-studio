@@ -1,0 +1,5 @@
+db.auth.singOut().then(() => {
+  window.location.href = 'login.html';
+}).catch((error) => {
+  alert("Gagal keluar: " + error.message);
+});
