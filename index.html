@@ -516,28 +516,40 @@ function formatHarga(min, max, satuan) {
 
 // 3. MENGAMBIL DATA DARI SUPABASE
 async function loadLayanan() {
+  console.log("Sedang mencoba mengambil data dari Supabase...");
+
+  // KITA UBAH QUERY-NYA SEMENTARA UNTUK MENCEGAH ERROR RELASI TABEL
   const { data, error } = await supabase
     .from('layanan')
-    .select('*, kategori(nama, urutan)')
+    .select('*') 
     .eq('aktif', true);
 
+  // JIKA ADA ERROR DARI SUPABASE, MUNCULKAN POP-UP!
   if (error) {
-    console.error("Gagal memuat data dari Supabase:", error);
-    document.getElementById('kat-view').innerHTML = `<p style="color:red; text-align:center;">Gagal memuat data. Pastikan RLS di Supabase sudah dimatikan.</p>`;
+    console.error("ERROR SUPABASE:", error);
+    alert("GAGAL MENGAMBIL DATA!\nPesan Error: " + error.message + "\nHint: " + error.hint);
     return;
   }
 
+  console.log("DATA BERHASIL DIAMBIL:", data);
+
+  // JIKA DATA KOSONG
+  if (!data || data.length === 0) {
+    alert("KONEKSI BERHASIL, TAPI DATA KOSONG!\nPastikan kamu sudah klik tombol 'Run' pada kode SQL untuk memasukkan data (INSERT) di dashboard Supabase.");
+    return;
+  }
+
+  // JIKA BERHASIL (Menggunakan fallback kategori sementara)
   allLayanan = data.map(l => ({
     id: l.id,
     nama: l.nama,
-    kategori: l.kategori ? l.kategori.nama : 'Lainnya',
+    kategori: 'Semua Perawatan', // Tampilkan semua di 1 kategori dulu
     harga_display: formatHarga(l.harga_min, l.harga_max, l.satuan),
-    urutan_kategori: l.kategori ? l.kategori.urutan : 99,
+    urutan_kategori: 1,
     harga_min: l.harga_min
-  })).sort((a, b) => a.urutan_kategori - b.urutan_kategori);
+  }));
 
-  uniqueCategories = [...new Set(allLayanan.map(l => l.kategori))];
-  
+  uniqueCategories = ['Semua Perawatan'];
   showCategories();
   renderPriceList(allLayanan); 
 }
