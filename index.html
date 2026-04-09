@@ -1,7 +1,4 @@
-<?php
-// index.php — Halaman Booking Pelanggan (Black & Pink Theme - Full Width Fix)
-require_once 'config.php';
-?><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8"/>
@@ -691,7 +688,163 @@ function showToast(msg, type = '') {
 
 document.getElementById('f-tanggal').min = new Date().toISOString().split('T')[0];
 loadLayanan();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<script>
+  // 1. INISIALISASI SUPABASE (GANTI DENGAN KODE DARI DASHBOARD SUPABASE KAMU)
+const supabaseUrl = 'https://vhsrmfmvblfqolhwgwbt.supabase.co';
+const supabaseKey = 'sb_publishable_s9k7BCnxJ5oC8cX-P7cxHA_73rlsi9K';
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+// [TETAPKAN KODE sampleImages, categoryDescriptions, dan specificServiceDescriptions KAMU DI SINI, SAYA HAPUS AGAR TIDAK KEPANJANGAN]
+
+// Fungsi bantuan format harga (menggantikan fungsi PHP)
+function formatHarga(min, max, satuan) {
+  const fmt = n => 'Rp ' + parseInt(n).toLocaleString('id-ID');
+  if (satuan === '(add)') return 'add ' + fmt(min);
+  let base = max ? fmt(min) + ' – ' + fmt(max) : fmt(min);
+  return satuan ? base + ' ' + satuan : base;
+}
+
+// 3. MENGAMBIL DATA LAYANAN
+async function loadLayanan() {
+  const { data, error } = await supabase
+    .from('layanan')
+    .select('*, kategori:kategori_id(nama, urutan)')
+    .eq('aktif', true);
+
+  if (error) {
+    console.error("Gagal memuat data", error);
+    return;
+  }
+
+  // Format data agar sama seperti struktur PHP sebelumnya
+  allLayanan = data.map(l => ({
+    id: l.id,
+    nama: l.nama,
+    kategori: l.kategori.nama,
+    harga_display: formatHarga(l.harga_min, l.harga_max, l.satuan),
+    urutan_kategori: l.kategori.urutan,
+    harga_min: l.harga_min
+  })).sort((a, b) => a.urutan_kategori - b.urutan_kategori);
+
+  uniqueCategories = [...new Set(allLayanan.map(l => l.kategori))];
+  showCategories();
+  renderPriceList(allLayanan); 
+}
+
+// [TETAPKAN FUNGSI showCategories, showServices, renderPriceList, toggleService, updateSelectedPanel, clearAllServices DI SINI (TIDAK PERLU DIUBAH)]
+
+// 4. CEK KETERSEDIAAN JADWAL
+async function cekSlot() {
+  const tgl = document.getElementById('f-tanggal').value;
+  const jam = document.getElementById('f-jam').value;
+  const hint = document.getElementById('slot-hint');
+  if (!tgl || !jam) { hint.textContent = ''; return; }
+
+  hint.textContent = 'Memeriksa ketersediaan...';
+  hint.className = 'hint';
+  
+  const { count, error } = await supabase
+    .from('booking')
+    .select('*', { count: 'exact', head: true })
+    .eq('tanggal', tgl)
+    .eq('jam', jam)
+    .neq('status', 'batal');
+
+  if (count === 0) {
+    hint.textContent = '✓ Jadwal tersedia'; hint.className = 'hint ok';
+  } else {
+    hint.textContent = '✕ Jadwal penuh. Silakan pilih waktu lain.'; hint.className = 'hint err';
+  }
+}
+
+// 5. PROSES SUBMIT BOOKING (MENGGANTIKAN api.php?action=buat_booking)
+async function submitBooking() {
+  const nama = document.getElementById('f-nama').value.trim();
+  const telepon = document.getElementById('f-telepon').value.trim();
+  const tanggal = document.getElementById('f-tanggal').value;
+  const jam = document.getElementById('f-jam').value;
+  const catatan = document.getElementById('f-catatan').value.trim();
+
+  if (!nama || !telepon || selectedServices.size === 0 || !tanggal || !jam) {
+    showToast('Lengkapi formulir dan pastikan Anda telah memilih layanan', 'err'); return;
+  }
+
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true; document.getElementById('btn-text').textContent = 'Memproses...';
+
+  try {
+    // A. Cek atau Buat Pelanggan
+    let pelangganId;
+    const { data: existUser } = await supabase.from('pelanggan').select('id').eq('telepon', telepon).single();
+    
+    if (existUser) {
+      pelangganId = existUser.id;
+      // Update nama jika berubah
+      await supabase.from('pelanggan').update({ nama: nama }).eq('id', pelangganId);
+    } else {
+      const { data: newUser } = await supabase.from('pelanggan').insert([{ nama, telepon }]).select().single();
+      pelangganId = newUser.id;
+    }
+
+    // B. Buat Kode Booking
+    const randomCode = Math.floor(1000 + Math.random() * 9000);
+    const kodeBooking = 'RS-' + randomCode;
+
+    // C. Insert ke Tabel Booking
+    const { data: newBooking, error: errBooking } = await supabase
+      .from('booking')
+      .insert([{
+        kode: kodeBooking,
+        pelanggan_id: pelangganId,
+        tanggal: tanggal,
+        jam: jam,
+        catatan: catatan,
+        status: 'pending'
+      }]).select().single();
+
+    if (errBooking) throw errBooking;
+
+    // D. Insert Layanan yang Dipilih
+    const layananToInsert = Array.from(selectedServices).map(id => {
+      const svc = allLayanan.find(l => l.id === id);
+      return {
+        booking_id: newBooking.id,
+        layanan_id: id,
+        harga_saat_booking: svc.harga_min
+      };
+    });
+
+    await supabase.from('booking_layanan').insert(layananToInsert);
+
+    // BERHASIL
+    btn.disabled = false; document.getElementById('btn-text').textContent = 'Konfirmasi Reservasi';
+    
+    document.getElementById('form-section').style.display = 'none';
+    document.getElementById('selected-panel').style.display = 'none';
+    const sc = document.getElementById('success-card');
+    sc.classList.add('show');
+    document.getElementById('success-kode').textContent = kodeBooking;
+    
+    const namaLayananStr = Array.from(selectedServices).map(id => allLayanan.find(l => l.id === id).nama).join(', ');
+    document.getElementById('success-layanan').textContent = namaLayananStr;
+    
+    sc.scrollIntoView({ behavior: 'smooth' });
+    showToast('Reservasi berhasil dibuat!', 'ok');
+
+  } catch (err) {
+    console.error(err);
+    btn.disabled = false; document.getElementById('btn-text').textContent = 'Konfirmasi Reservasi';
+    showToast('Terjadi kesalahan sistem, silakan coba lagi.', 'err');
+  }
+}
+
+// [TETAPKAN FUNGSI resetForm dan showToast DI SINI]
+
+document.getElementById('f-tanggal').min = new Date().toISOString().split('T')[0];
+loadLayanan();
 </script>
 </body>
 </html>
