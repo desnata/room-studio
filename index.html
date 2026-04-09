@@ -210,8 +210,54 @@ let allLayanan = [];
 let selectedServices = new Set();
 let uniqueCategories = [];
 
+// KAMUS GAMBAR & DESKRIPSI (DIKEMBALIKAN SEPERTI SEMULA)
 const sampleImages = {'Eyelash': 'image/Eyelash.jpg', 'Nail': 'image/Nail.jpg', 'Hair Service': 'image/Hair.jpg'};
 const defaultImg = 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=400&q=80';
+
+const categoryDescriptions = {
+  'Eyelash': 'Perawatan bulu mata eksklusif untuk tampilan lentik, bervolume natural, dan tahan lama.',
+  'Nail': 'Perawatan esensial dan seni kuku (Manicure/Pedicure, Gel Paint, Extension) untuk kuku cantik yang merefleksikan gaya Anda.',
+  'Hair Service': 'Layanan rambut lengkap (Cutting, Styling, Coloring, Treatment intensif) untuk menjaga kesehatan dan keindahan mahkota Anda.',
+};
+
+const specificServiceDescriptions = {
+  'Natural Lash': 'Pemasangan bulu mata yang terlihat seperti bulu mata asli, sangat natural dan ringan.',
+  'Standar Lash': 'Pemasangan bulu mata dengan ketebalan standar untuk tampilan lentik yang pas.',
+  'Volume Lash': 'Teknik pemasangan bulu mata bercabang untuk hasil yang lebih penuh, tebal, dan dramatis.',
+  'Wispy Lash': 'Gaya pemasangan dengan panjang bulu mata yang bervariasi.',
+  'Anime Lash': 'Gaya bulu mata populer yang menyerupai karakter anime.',
+  'Cat Eye Lash': 'Pemasangan dengan bulu mata yang lebih panjang di ujung luar mata.',
+  'Remove': 'Pelepasan bulu mata extension lama secara aman.',
+  'Retouch': 'Pengisian kembali area bulu mata extension yang sudah rontok.',
+  'Menicure': 'Perawatan esensial untuk membersihkan kutikula dan kuku tangan.',
+  'Pedicure': 'Perawatan relaksasi untuk kaki dan merapikan kuku jari kaki.',
+  'Pedicure+Callus': 'Paket pedicure lengkap ditambah perawatan mengangkat kapalan.',
+  'Classic Gel Hand': 'Aplikasi pewarnaan kuku dengan cat gel pada tangan.',
+  'Classic Gel Feet': 'Aplikasi pewarnaan kuku dengan cat gel pada kaki.',
+  'French Nail': 'Gaya kuku klasik dengan ujung kuku berwarna putih.',
+  'Ombré Nail': 'Teknik pewarnaan kuku dengan gradasi dua warna.',
+  'Cat Eye': 'Teknik pewarnaan gel khusus dengan efek mata kucing.',
+  'Acrylic Ext': 'Pemanjangan kuku buatan menggunakan bahan acrylic.',
+  'Half Ext': 'Pemanjangan kuku hanya pada bagian setengah ujung kuku.',
+  'Full Ext': 'Pemanjangan kuku penuh menutupi seluruh kuku asli.',
+  'Remove Gel': 'Pembersihan cat kuku gel lama secara profesional.',
+  'Remove Ext': 'Pelepasan kuku sambung (extension) lama.',
+  'Art 1pcs': 'Penambahan seni lukis kuku/hiasan untuk 1 jari.',
+  'Art 2pcs': 'Penambahan seni lukis kuku/hiasan untuk 2 jari.',
+  'Art 4pcs': 'Penambahan seni lukis kuku/hiasan untuk 4 jari.',
+  'Overlay': 'Lapisan pelindung tambahan bening di atas kuku asli.',
+  'Hair Wash': 'Pencucian rambut yang menenangkan menggunakan sampo premium.',
+  'Hair Wash + Mask Biasa': 'Paket cuci rambut dilanjutkan dengan aplikasi masker.',
+  'Hair Wash + Mask Merek': 'Paket cuci rambut dengan masker rambut bermerek.',
+  'Wash + Mask B + Catok': 'Paket lengkap: Cuci rambut, masker biasa, dan ditata.',
+  'Wash + Mask M + Catok': 'Paket premium: Cuci rambut, masker bermerek, dan ditata.',
+  'Hair Wash + Catok': 'Pencucian rambut dilanjutkan dengan penataan rambut.',
+  'Catok Only': 'Layanan khusus penataan rambut menggunakan catokan.',
+  'Creambath Biasa': 'Perawatan relaksasi rambut dan kulit kepala.',
+  'Creambath Merek': 'Perawatan relaksasi rambut premium bermerek.',
+  'Creambath B + Catok': 'Paket creambath standar diakhiri dengan catokan.',
+  'Creambath M + Catok': 'Paket relaksasi creambath produk bermerek diakhiri catokan.'
+};
 
 function formatHarga(min, max, satuan) {
   const fmt = n => 'Rp ' + parseInt(n).toLocaleString('id-ID');
@@ -225,12 +271,10 @@ async function loadLayanan() {
   try {
     document.getElementById('kat-view').innerHTML = `<p style="text-align:center;">Mengambil data layanan dari server...</p>`;
     
-    // Ambil Data Kategori
     const resKat = await fetch(`${SUPABASE_URL}/rest/v1/kategori?select=*`, { headers });
     if (!resKat.ok) throw new Error("Gagal mengambil Kategori");
     const katData = await resKat.json();
 
-    // Ambil Data Layanan
     const resLay = await fetch(`${SUPABASE_URL}/rest/v1/layanan?select=*`, { headers });
     if (!resLay.ok) throw new Error("Gagal mengambil Layanan");
     const layData = await resLay.json();
@@ -240,7 +284,6 @@ async function loadLayanan() {
       return;
     }
 
-    // Menggabungkan data secara manual (Bypass Error Relasi & Tipe Data)
     allLayanan = layData
       .filter(l => l.aktif === true || l.aktif === 1 || String(l.aktif) === "1" || l.aktif === "t")
       .map(l => {
@@ -267,22 +310,25 @@ async function loadLayanan() {
   }
 }
 
-// 2. FUNGSI TAMPILAN
+// 2. FUNGSI TAMPILAN KATEGORI (Ditambah Deskripsi)
 function showCategories() {
   document.getElementById('kat-view').style.display = 'grid';
   document.getElementById('svc-view').style.display = 'none';
   document.getElementById('section-subtitle').textContent = 'Silakan pilih kategori perawatan yang Anda butuhkan.';
   document.getElementById('kat-view').innerHTML = uniqueCategories.map(cat => {
     let imgSrc = sampleImages[cat] || defaultImg;
+    let desc = categoryDescriptions[cat] || 'Perawatan kecantikan eksklusif untuk hasil sempurna dan memuaskan.';
     return `
       <div class="kat-card" onclick="showServices('${cat}')">
         <div class="kat-img"><img src="${imgSrc}" alt="${cat}" /></div>
         <div class="kat-title">${cat}</div>
+        <div class="kat-desc" style="padding: 0 1.5rem 1.5rem 1.5rem; text-align: center; font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; font-weight: 300;">${desc}</div>
       </div>
     `;
   }).join('');
 }
 
+// 3. FUNGSI TAMPILAN LAYANAN (Diubah menjadi Deskripsi, Bukan Harga)
 function showServices(catName) {
   document.getElementById('kat-view').style.display = 'none';
   document.getElementById('svc-view').style.display = 'block';
@@ -291,10 +337,11 @@ function showServices(catName) {
   
   const list = allLayanan.filter(l => l.kategori === catName);
   document.getElementById('svc-list').innerHTML = list.map(l => {
+    let desc = specificServiceDescriptions[l.nama] || categoryDescriptions[catName] || 'Perawatan kecantikan eksklusif untuk hasil terbaik.';
     return `
     <div class="svc-item ${selectedServices.has(l.id) ? 'selected' : ''}" id="svc-${l.id}" onclick="toggleService(${l.id})">
       <div class="svc-item-name">${l.nama}</div>
-      <div class="svc-item-desc" style="color:var(--accent-pink); font-weight:500;">${l.harga_display}</div>
+      <div class="svc-item-desc">${desc}</div>
     </div>
   `}).join('');
 }
@@ -334,7 +381,7 @@ function clearAllServices() {
   updateSelectedPanel();
 }
 
-// 3. FUNGSI CEK JADWAL VIA REST API
+// 4. FUNGSI CEK JADWAL VIA REST API
 async function cekSlot() {
   const tgl = document.getElementById('f-tanggal').value; const jam = document.getElementById('f-jam').value;
   const hint = document.getElementById('slot-hint');
@@ -352,7 +399,7 @@ async function cekSlot() {
   }
 }
 
-// 4. FUNGSI SUBMIT VIA REST API
+// 5. FUNGSI SUBMIT VIA REST API
 async function submitBooking() {
   const nama = document.getElementById('f-nama').value.trim(), telepon = document.getElementById('f-telepon').value.trim();
   const tanggal = document.getElementById('f-tanggal').value, jam = document.getElementById('f-jam').value, catatan = document.getElementById('f-catatan').value.trim();
@@ -362,7 +409,7 @@ async function submitBooking() {
   const btn = document.getElementById('btn-submit'); btn.disabled = true; document.getElementById('btn-text').textContent = 'Memproses...';
 
   try {
-    // 4A. Cek atau Buat Pelanggan
+    // 5A. Cek atau Buat Pelanggan
     const resP = await fetch(`${SUPABASE_URL}/rest/v1/pelanggan?select=id&telepon=eq.${encodeURIComponent(telepon)}`, { headers });
     const pData = await resP.json();
     
@@ -381,7 +428,7 @@ async function submitBooking() {
       pelangganId = newPData[0].id;
     }
 
-    // 4B. Buat Booking
+    // 5B. Buat Booking
     const kodeBooking = 'RS-' + Math.floor(1000 + Math.random() * 9000);
     const resB = await fetch(`${SUPABASE_URL}/rest/v1/booking`, {
       method: 'POST', headers: { ...headers, 'Prefer': 'return=representation' },
@@ -390,7 +437,7 @@ async function submitBooking() {
     const bData = await resB.json();
     const newBookingId = bData[0].id;
 
-    // 4C. Masukkan Layanan
+    // 5C. Masukkan Layanan
     const arrLayanan = Array.from(selectedServices).map(id => {
       const svc = allLayanan.find(l => l.id === id);
       return { booking_id: newBookingId, layanan_id: id, harga_saat_booking: svc.harga_min };
@@ -399,7 +446,7 @@ async function submitBooking() {
       method: 'POST', headers: headers, body: JSON.stringify(arrLayanan)
     });
 
-    // 4D. Selesai
+    // 5D. Selesai
     btn.disabled = false; document.getElementById('btn-text').textContent = 'Konfirmasi Reservasi';
     document.getElementById('form-section').style.display = 'none'; document.getElementById('selected-panel').style.display = 'none';
     const sc = document.getElementById('success-card'); sc.classList.add('show');
