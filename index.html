@@ -218,45 +218,54 @@ function formatHarga(min, max, satuan) {
 }
 
 // FUNGSI UTAMA LOAD DATA
+// FUNGSI UTAMA LOAD DATA (VERSI ANTI-GAGAL)
 async function loadLayanan() {
   try {
-    document.getElementById('kat-view').innerHTML = `<p style="text-align:center;">Menghubungkan ke database...</p>`;
+    document.getElementById('kat-view').innerHTML = `<p style="text-align:center;">Menarik data dari server...</p>`;
     
-    // Tarik data dengan relasi menggunakan variabel 'db'
-    const { data, error } = await db.from('layanan').select('*, kategori:kategori_id(nama, urutan)').eq('aktif', true);
+    // 1. Ambil data kategori (terpisah)
+    const { data: kategoriData, error: errKat } = await db.from('kategori').select('*');
+    if (errKat) throw new Error("Error Kategori: " + errKat.message);
 
-    // Deteksi Error
-    if (error) {
-      document.getElementById('kat-view').innerHTML = `<div style="background:#fee; padding:20px; border-radius:10px; color:red; text-align:center;">
-        <strong>Koneksi Gagal (Error Database)</strong><br>${error.message}
-      </div>`;
-      return;
-    }
+    // 2. Ambil data layanan (terpisah, tanpa filter aktif di database)
+    const { data: layananData, error: errLay } = await db.from('layanan').select('*');
+    if (errLay) throw new Error("Error Layanan: " + errLay.message);
 
-    // Deteksi Data Kosong
-    if (!data || data.length === 0) {
+    if (!layananData || layananData.length === 0) {
       document.getElementById('kat-view').innerHTML = `<div style="background:#fff3cd; padding:20px; border-radius:10px; color:#856404; text-align:center;">
-        <strong>Koneksi Berhasil, Tapi Data Kosong!</strong><br>Pastikan Anda sudah mengisi data SQL di Supabase.
+        <strong>Data Kosong!</strong><br>Pastikan Anda sudah mengisi data SQL di Supabase.
       </div>`;
       return;
     }
 
-    // Format Data
-    allLayanan = data.map(l => ({
-      id: l.id,
-      nama: l.nama,
-      kategori: l.kategori ? l.kategori.nama : 'Lainnya',
-      harga_display: formatHarga(l.harga_min, l.harga_max, l.satuan),
-      urutan_kategori: l.kategori ? l.kategori.urutan : 99,
-      harga_min: l.harga_min
-    })).sort((a, b) => a.urutan_kategori - b.urutan_kategori);
+    // 3. Gabungkan Data secara manual di JavaScript
+    allLayanan = layananData
+      // Filter status aktif (mendukung angka 1, string "1", atau boolean true)
+      .filter(l => l.aktif === true || l.aktif === 1 || l.aktif === "1" || l.aktif === "t")
+      .map(l => {
+        // Cari nama kategori berdasarkan kategori_id
+        const kat = kategoriData.find(k => k.id === l.kategori_id);
+        return {
+          id: l.id,
+          nama: l.nama,
+          kategori: kat ? kat.nama : 'Lainnya',
+          harga_display: formatHarga(l.harga_min, l.harga_max, l.satuan),
+          urutan_kategori: kat ? kat.urutan : 99,
+          harga_min: l.harga_min
+        };
+      }).sort((a, b) => a.urutan_kategori - b.urutan_kategori);
 
     uniqueCategories = [...new Set(allLayanan.map(l => l.kategori))];
+    
+    // Tampilkan ke layar
     showCategories();
     renderPriceList(allLayanan); 
 
   } catch (err) {
-    document.getElementById('kat-view').innerHTML = `<div style="background:#fee; color:red; text-align:center; padding:20px;"><strong>Terjadi Kesalahan Sistem JavaScript:</strong><br>${err.message}</div>`;
+    // Jika masih ada error, tampilkan dengan jelas di layar
+    document.getElementById('kat-view').innerHTML = `<div style="background:#fee; color:red; text-align:center; padding:20px; border-radius:10px;">
+      <strong>Terjadi Kesalahan Sistem:</strong><br>${err.message}
+    </div>`;
   }
 }
 
