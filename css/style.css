@@ -17,7 +17,7 @@ body{ font-family:var(--sans); background:var(--bg-main); color:var(--text-dark)
 .brand-text span{color:var(--accent-pink)}
 .nav-link{ color: var(--white); border: 2px solid var(--white); text-decoration: none; font-size: .85rem; font-weight: 500; letter-spacing: .5px; transition: all .3s; padding: 0.6rem 1.2rem; border-radius: 20px; }
 .nav-link:hover{ background-color: #fff; color: var(--primary-black); }
-.hero{ position: relative; width: 100%; height: 100vh; min-height: 500px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background-image: url('https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center; background-repeat: no-repeat; padding: 0 5%; }
+.hero{ position: relative; width: 100%; height: 100vh; min-height: 500px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background-image: url('image/Desain tanpa judul.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; padding: 0 5%; }
 .hero::before { content: ''; position: absolute; inset: 0; background: rgba(10, 10, 10, 0.4); z-index: 1; }
 .hero-content{ position: relative; z-index: 2; max-width: 900px; display: flex; flex-direction: column; align-items: center; margin-top: 80px; }
 .hero-tag { font-family: var(--script); color: var(--accent-pink); font-size: clamp(3rem, 5vw, 4.5rem); letter-spacing: 2px; margin-bottom: -15px; }
