@@ -93,4 +93,4 @@ footer{text-align:center;padding:3rem;border-top:1px solid var(--border-color);c
 footer a{color:var(--primary-black);text-decoration:none;font-weight:500}
 footer a:hover{color:var(--accent-pink)}
 @media(max-width:992px){ .hero-tag {font-size: 3rem;} .hero h1 {font-size: 2.5rem;} }
-@media(max-width:768px){ .nav{padding:1rem 5%} .form-grid{grid-template-columns:1fr} .s-title{font-size:2rem} .form-card{padding:2rem 1.5rem} }
+@media(max-width:768px){ .nav{padding:1rem 5%} .form-grid{grid-template-columns:1fr} .s-title{font-size:2rem} .form-card{padding:2rem 1.5rem}.hero { background-position: 70% center; } }
