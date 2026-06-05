@@ -200,13 +200,15 @@ function selectTime(time, element) {
 </script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
+  let batasMaksimal = new Date();
+  batasMaksimal.setDate(batasMaksimal.getDate() + 3);
   // Mengaktifkan kalender cantik pada input tanggal
   flatpickr("#f-tanggal", {
     dateFormat: "Y-m-d",
-    minDate: "today", // Mencegah pelanggan memilih tanggal yang sudah lewat
-    disableMobile: "true", // Memaksa penggunaan desain kalender kita di HP (tidak pakai bawaan HP)
+    minDate: "today",
+    maxDate: batasMaksimal, 
+    disableMobile: "true",
     onChange: function(selectedDates, dateStr, instance) {
-      // Panggil fungsi cekSlot saat tanggal dipilih
       if(typeof cekSlot === 'function') {
         cekSlot();
       }
