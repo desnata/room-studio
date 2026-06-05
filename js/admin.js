@@ -6,7 +6,7 @@ async function checkAuth() {
   const { data: { session } } = await db.auth.getSession();
   if (!session) { window.location.href = 'login.html'; return; }
   document.getElementById('admin-email').textContent = session.user.email.split('@')[0];
-  document.getElementById('admin-avatar').textContent = session.user.email.charAt(0).toUpperCase();
+  document.getElementByI('admin-avatar').textContent = session.user.email.charAt(0).toUpperCase();
 }
 checkAuth();
 
