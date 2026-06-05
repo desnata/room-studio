@@ -109,12 +109,18 @@
     <div class="form-title">Isi Data Diri</div>
     <p class="form-sub">Lengkapi data diri dan tentukan waktu kunjungan Anda.</p>
     <div class="form-grid">
-      <div class="fg"><label>Nama Lengkap *</label><input type="text" id="f-nama" placeholder="Masukkan nama Anda"/></div>
-      <div class="fg"><label>No. WhatsApp *</label><input type="tel" id="f-telepon" placeholder="Contoh: 081234567890"/></div>
-      <div class="fg"><label>Tanggal Kunjungan *</label><input type="date" id="f-tanggal" onchange="cekSlot()"/></div>
+      <div class="fg"><label>Nama Lengkap</label><input type="text" id="f-nama" placeholder="Masukkan nama Anda"/></div>
+      <div class="fg">
+        <label>No. WhatsApp</label>
+        <div class="phone-wrapper">
+          <span class="phone-prefix">+62</span>
+          <input type="tel" id="f-telepon" placeholder="8123456789" pattern="[0-9]*" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')"/>
+        </div>
+      </div>
+      <div class="fg"><label>Tanggal Kunjungan</label><input type="date" id="f-tanggal" onchange="cekSlot()"/></div>
       
       <div class="fg full">
-        <label>Pilih Waktu *</label>
+        <label>Pilih Waktu</label>
         <input type="hidden" id="f-jam" value="" />
         
         <div class="time-slot-grid" id="ui-time-slots">

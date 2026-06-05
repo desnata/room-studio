@@ -106,9 +106,13 @@ async function loadBookings() {
     <td style="font-weight:600">${formatRp(b.total_harga)}</td>
     <td>${statusBadge(b.status)}</td>
     <td>
-      <div class="action-btns">
-        <button class="btn btn-detail" onclick="detailBooking(${b.id})">Detail</button>
-        ${b.status==='pending' ? `<button class="btn btn-success" onclick="updateStatus(${b.id},'confirmed')">✓</button>` : ''}
+      <div class="action-btns" style="display: flex; gap: 0.5rem; align-items: center;">
+        
+        <button class="btn btn-detail" onclick="detailBooking(${b.id})">Detail</button>        
+        ${b.status==='pending' ? `<button class="btn btn-success" style="padding: 0.4rem 0.6rem; display: flex; align-items: center;" onclick="updateStatus(${b.id},'confirmed')" title="Konfirmasi">✓</button>` : ''}
+        <button class="btn btn-danger" style="padding: 0.4rem 0.6rem; display: flex; align-items: center;" onclick="hapusBooking('${b.id}')" title="Hapus Booking">
+          <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
+        </button>
       </div>
     </td>
   </tr>`).join('');
@@ -176,6 +180,11 @@ async function loadPelanggan() {
     <td style="font-weight:600">${c.nama}</td>
     <td>${c.telepon}</td>
     <td><span class="badge" style="background:var(--primary-soft);color:var(--primary-hover);font-weight:600;">${formatDate(c.dibuat)}</span></td>
+    <td>
+  <button class="btn btn-danger" style="padding: 0.4rem 0.8rem;" onclick="hapusPelanggan('${c.id}')" title="Hapus Pelanggan">
+    <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
+  </button>
+</td>
   </tr>`).join('');
 }
 
@@ -197,3 +206,55 @@ document.addEventListener('DOMContentLoaded', () => {
   loadDashboard();
   setupRealtime();
 });
+// --- FUNGSI HAPUS BOOKING ---
+async function hapusBooking(id) {
+  // Konfirmasi sebelum menghapus
+  const yakin = confirm("Apakah Anda yakin ingin menghapus data booking ini? Data yang dihapus tidak dapat dikembalikan.");
+  if (!yakin) return;
+
+  try {
+    // Gunakan 'db', BUKAN 'supabase'
+    const { error } = await db
+      .from('booking') 
+      .delete()
+      .eq('id', id);  
+
+    if (error) throw error;
+
+    if(typeof showToast === 'function') showToast("Data booking berhasil dihapus!");
+    else alert("Data booking berhasil dihapus!");
+
+    loadBookings(); // Refresh tabel
+    loadDashboard(); // Refresh angka di dashboard atas
+    
+  } catch (error) {
+    console.error("Error menghapus booking:", error);
+    alert("Gagal menghapus data booking. Silakan coba lagi.");
+  }
+}
+
+// --- FUNGSI HAPUS PELANGGAN ---
+async function hapusPelanggan(id) {
+  const yakin = confirm("Yakin ingin menghapus pelanggan ini? Pastikan pelanggan ini tidak memiliki data booking yang masih aktif.");
+  if (!yakin) return;
+
+  try {
+    // Gunakan 'db', BUKAN 'supabase'
+    const { error } = await db
+      .from('pelanggan') 
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+
+    if(typeof showToast === 'function') showToast("Data pelanggan berhasil dihapus!");
+    else alert("Data pelanggan berhasil dihapus!");
+
+    loadPelanggan(); // Refresh tabel pelanggan
+    loadDashboard(); // Refresh angka pelanggan di dashboard
+    
+  } catch (error) {
+    console.error("Error menghapus pelanggan:", error);
+    alert("Gagal menghapus data. Jika pelanggan ini memiliki history booking, hapus bookingnya terlebih dahulu.");
+  }
+}

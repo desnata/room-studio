@@ -366,3 +366,40 @@ footer a:hover { color: var(--primary-hover); text-decoration: underline; }
   .htb-grid { grid-template-columns: 1fr; }
   .htb-header { margin-bottom: 2.5rem; }
 }
+/* --- UI KHUSUS INPUT WHATSAPP (+62) --- */
+.phone-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-main);
+  transition: all 0.3s;
+  overflow: hidden;
+}
+
+/* Memberikan efek fokus (pink) ke seluruh kotak saat input diklik */
+.phone-wrapper:focus-within {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+  background: var(--bg-white);
+}
+
+.phone-prefix {
+  padding: 1rem 0.8rem 1rem 1.2rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  background: var(--bg-main); /* Mengikuti warna background formulir */
+  border-right: 1px solid var(--border-color); /* Garis pemisah antara +62 dan input */
+  font-family: var(--sans);
+  font-size: 1rem;
+}
+
+/* Mereset style input bawaan agar menyatu dengan bungkusnya */
+.phone-wrapper input {
+  flex: 1;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 1rem 1.2rem !important;
+  margin: 0 !important;
+}

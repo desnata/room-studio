@@ -191,7 +191,7 @@ async function cekSlot() {
 
 // 5. FUNGSI SUBMIT VIA REST API
 async function submitBooking() {
-  const nama = document.getElementById('f-nama').value.trim(), telepon = document.getElementById('f-telepon').value.trim();
+  const nama = document.getElementById('f-nama').value.trim(), telepon = "62" + document.getElementById('f-telepon').value.trim();
   const tanggal = document.getElementById('f-tanggal').value, jam = document.getElementById('f-jam').value, catatan = document.getElementById('f-catatan').value.trim();
 
   if (!nama || !telepon || selectedServices.size === 0 || !tanggal || !jam) { showToast('Lengkapi formulir & layanan', 'err'); return; }
