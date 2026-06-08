@@ -31,14 +31,17 @@ Proyek ini menerapkan prinsip *Separation of Concerns* (pemisahan logika, kerang
 
 ```text
 room-studio/
+│
+├── index.html          <-- Halaman booking publik
+├── admin.html          <-- Halaman dasbor admin
+├── login.html          <-- Halaman login admin
+│
 ├── css/
-│   └── style.css       # File utama untuk gaya/desain halaman
-├── js/
-│   ├── main.js         # Logika untuk halaman booking pelanggan (index.html)
-│   ├── admin.js        # Logika dashboard admin (mengambil & mengubah data)
-│   └── login.js        # Logika sistem login Supabase
-├── image/              # Direktori aset gambar (Logo, Eyelash, Nail, dll.)
-├── index.html          # Halaman utama (Landing Page & Form Booking)
-├── login.html          # Halaman login untuk Admin
-├── admin.html          # Halaman Dashboard Super-Admin
+│   ├── style.css       <-- Desain halaman publik
+│   └── admin.css       <-- Desain halaman admin
+│
+└── js/
+    ├── config.js       <-- Khusus inisialisasi Supabase & konstanta global
+    ├── main.js         <-- Khusus logika halaman booking publik (cekSlot, submit)
+    └── admin.js        <-- Khusus logika halaman admin (loadBookings, export, CRUD)
 └── README.md           # Dokumentasi proyek ini
