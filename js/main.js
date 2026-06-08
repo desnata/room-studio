@@ -1,4 +1,8 @@
-// PENGATURAN API SUPABASE
+// ==========================================
+// LOGIKA UTAMA: HALAMAN RESERVASI PELANGGAN
+// ==========================================
+
+// Pengaturan header REST API murni (mengambil kunci anon dari config global)
 const SUPABASE_URL = 'https://vhsrmfmvblfqolhwgwbt.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoc3JtZm12YmxmcW9saHdnd2J0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2ODQ4NjAsImV4cCI6MjA5MTI2MDg2MH0.jxVo-xAjpEyaqGiROMlWbdwmCga6GKNz_rnNrRYPpWQ';
 
@@ -12,9 +16,9 @@ let allLayanan = [];
 let selectedServices = new Set();
 let uniqueCategories = [];
 
-// KAMUS GAMBAR & DESKRIPSI
+// Kamus Gambar & Deskripsi Katalog Layanan
 const sampleImages = {'Eyelash': 'image/Eyelash.jpg', 'Nail': 'image/Nail.jpg'};
-const sampleImage = 'image/Latar.jpg';
+const defaultImg = 'image/Latar.jpg';
 
 const categoryDescriptions = {
   'Eyelash': 'Perawatan bulu mata eksklusif untuk tampilan lentik, bervolume natural, dan tahan lama.',
@@ -56,7 +60,7 @@ function formatHarga(min, max, satuan) {
   return satuan ? base + ' ' + satuan : base;
 }
 
-// 1. FUNGSI LOAD DATA VIA REST API MURNI
+// 1. Ambil data layanan publik dari Supabase via REST API
 async function loadLayanan() {
   try {
     document.getElementById('kat-view').innerHTML = `<p style="text-align:center;">Mengambil data layanan dari server...</p>`;
@@ -100,7 +104,7 @@ async function loadLayanan() {
   }
 }
 
-// 2. FUNGSI TAMPILAN KATEGORI (Ditambah Deskripsi)
+// 2. Render tampilan kategori produk
 function showCategories() {
   document.getElementById('kat-view').style.display = 'grid';
   document.getElementById('svc-view').style.display = 'none';
@@ -118,7 +122,7 @@ function showCategories() {
   }).join('');
 }
 
-// 3. FUNGSI TAMPILAN LAYANAN (Diubah menjadi Deskripsi, Bukan Harga)
+// 3. Tampilkan sub-layanan spesifik dari kategori terpilih
 function showServices(catName) {
   document.getElementById('kat-view').style.display = 'none';
   document.getElementById('svc-view').style.display = 'block';
@@ -171,83 +175,128 @@ function clearAllServices() {
   updateSelectedPanel();
 }
 
-// 4. FUNGSI CEK JADWAL VIA REST API
+// 4. Verifikasi slot jam yang tersedia di tanggal tertentu
 async function cekSlot() {
-  const tgl = document.getElementById('f-tanggal').value; const jam = document.getElementById('f-jam').value;
-  const hint = document.getElementById('slot-hint');
-  if (!tgl || !jam) { hint.textContent = ''; return; }
-  
-  hint.textContent = 'Memeriksa...'; hint.className = 'hint';
-  
+  const tgl = document.getElementById('f-tanggal').value;
+  if (!tgl) return;
+
+  const pills = document.querySelectorAll('.time-pill');
+  pills.forEach(p => p.classList.remove('disabled', 'active'));
+  document.getElementById('f-jam').value = ""; 
+
+  document.getElementById('slot-hint').innerHTML = '<span style="color:var(--text-muted)">Memeriksa ketersediaan jadwal...</span>';
+
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/booking?select=id&tanggal=eq.${tgl}&jam=eq.${jam}&status=neq.batal`, { headers });
-    const data = await res.json();
-    if (data.length === 0) { hint.textContent = '✓ Jadwal tersedia'; hint.className = 'hint ok'; } 
-    else { hint.textContent = '✕ Jadwal penuh.'; hint.className = 'hint err'; }
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/booking?select=jam&tanggal=eq.${tgl}&status=neq.batal`, { headers });
+    if (!res.ok) throw new Error("Gagal mengambil data jadwal");
+    const bookedData = await res.json();
+    
+    const bookedTimes = bookedData.map(b => b.jam.substring(0, 5));
+
+    pills.forEach(p => {
+      const pillTime = p.textContent.trim();
+      if (bookedTimes.includes(pillTime)) {
+        p.classList.add('disabled'); 
+      }
+    });
+
+    document.getElementById('slot-hint').innerHTML = '<span class="ok">Pilih jam yang tersedia (warna putih).</span>';
   } catch (err) {
-    hint.textContent = 'Gagal cek jadwal'; hint.className = 'hint err';
+    console.error(err);
+    document.getElementById('slot-hint').innerHTML = '<span class="err">Gagal memuat jadwal. Cek koneksi Anda.</span>';
   }
 }
 
-// 5. FUNGSI SUBMIT VIA REST API
+// 5. Submit entri reservasi baru ke database Supabase
 async function submitBooking() {
-  const nama = document.getElementById('f-nama').value.trim(), telepon = "62" + document.getElementById('f-telepon').value.trim();
-  const tanggal = document.getElementById('f-tanggal').value, jam = document.getElementById('f-jam').value, catatan = document.getElementById('f-catatan').value.trim();
+  const nama = document.getElementById('f-nama').value.trim();
+  const telepon = "62" + document.getElementById('f-telepon').value.trim();
+  const tanggal = document.getElementById('f-tanggal').value;
+  const jam = document.getElementById('f-jam').value;
+  const catatan = document.getElementById('f-catatan').value.trim();
 
-  if (!nama || !telepon || selectedServices.size === 0 || !tanggal || !jam) { showToast('Lengkapi formulir & layanan', 'err'); return; }
+  if (!nama || !telepon || selectedServices.size === 0 || !tanggal || !jam) { 
+    showToast('Silakan lengkapi formulir & pilih layanan terlebih dahulu.', 'err'); 
+    return; 
+  }
 
-  const btn = document.getElementById('btn-submit'); btn.disabled = true; document.getElementById('btn-text').textContent = 'Memproses...';
+  const btn = document.getElementById('btn-submit'); 
+  btn.disabled = true; 
+  document.getElementById('btn-text').textContent = 'Memproses...';
+  btn.style.opacity = "0.7";
+  btn.style.cursor = "not-allowed";
 
   try {
-    // 5A. Cek atau Buat Pelanggan
+    // 5A. Validasi / Simpan Informasi Pelanggan
     const resP = await fetch(`${SUPABASE_URL}/rest/v1/pelanggan?select=id&telepon=eq.${encodeURIComponent(telepon)}`, { headers });
+    if (!resP.ok) throw new Error("Gagal memeriksa data pelanggan.");
     const pData = await resP.json();
     
     let pelangganId;
     if (pData.length > 0) {
       pelangganId = pData[0].id;
-      await fetch(`${SUPABASE_URL}/rest/v1/pelanggan?id=eq.${pelangganId}`, {
+      const resPatch = await fetch(`${SUPABASE_URL}/rest/v1/pelanggan?id=eq.${pelangganId}`, {
         method: 'PATCH', headers: headers, body: JSON.stringify({ nama: nama })
       });
+      if (!resPatch.ok) throw new Error("Gagal memperbarui data pelanggan.");
     } else {
       const resNewP = await fetch(`${SUPABASE_URL}/rest/v1/pelanggan`, {
         method: 'POST', headers: { ...headers, 'Prefer': 'return=representation' },
         body: JSON.stringify({ nama: nama, telepon: telepon })
       });
+      if (!resNewP.ok) throw new Error("Gagal mendaftarkan pelanggan baru.");
       const newPData = await resNewP.json();
       pelangganId = newPData[0].id;
     }
 
-    // 5B. Buat Booking
+    // 5B. Input Lembar Reservasi Utama
     const kodeBooking = 'RS-' + Math.floor(1000 + Math.random() * 9000);
     const resB = await fetch(`${SUPABASE_URL}/rest/v1/booking`, {
       method: 'POST', headers: { ...headers, 'Prefer': 'return=representation' },
       body: JSON.stringify({ kode: kodeBooking, pelanggan_id: pelangganId, tanggal: tanggal, jam: jam, catatan: catatan, status: 'pending' })
     });
+    
+    if (!resB.ok) {
+        const errorDB = await resB.json();
+        if (errorDB.code === '23505') {
+            throw new Error('Maaf, jadwal ini baru saja dipesan orang lain. Silakan pilih waktu lain.');
+        }
+        throw new Error("Gagal membuat reservasi di database.");
+    }
+
     const bData = await resB.json();
     const newBookingId = bData[0].id;
 
-    // 5C. Masukkan Layanan
+    // 5C. Petakan Layanan Terpilih ke Hubungan Relasi N-to-N
     const arrLayanan = Array.from(selectedServices).map(id => {
       const svc = allLayanan.find(l => l.id === id);
       return { booking_id: newBookingId, layanan_id: id, harga_saat_booking: svc.harga_min };
     });
-    await fetch(`${SUPABASE_URL}/rest/v1/booking_layanan`, {
+    const resL = await fetch(`${SUPABASE_URL}/rest/v1/booking_layanan`, {
       method: 'POST', headers: headers, body: JSON.stringify(arrLayanan)
     });
+    if (!resL.ok) throw new Error("Gagal menyimpan detail layanan.");
 
-    // 5D. Selesai
-    btn.disabled = false; document.getElementById('btn-text').textContent = 'Konfirmasi Reservasi';
-    document.getElementById('form-section').style.display = 'none'; document.getElementById('selected-panel').style.display = 'none';
-    const sc = document.getElementById('success-card'); sc.classList.add('show');
+    // 5D. Perbarui Antarmuka Sukses
+    document.getElementById('form-section').style.display = 'none'; 
+    document.getElementById('selected-panel').style.display = 'none';
+    
+    const sc = document.getElementById('success-card'); 
+    sc.classList.add('show');
     document.getElementById('success-kode').textContent = kodeBooking;
     document.getElementById('success-layanan').textContent = Array.from(selectedServices).map(id => allLayanan.find(l => l.id === id).nama).join(', ');
-    sc.scrollIntoView({ behavior: 'smooth' }); showToast('Reservasi berhasil!', 'ok');
+    
+    sc.scrollIntoView({ behavior: 'smooth' }); 
+    showToast('Reservasi berhasil!', 'ok');
 
   } catch (err) {
-    btn.disabled = false; document.getElementById('btn-text').textContent = 'Konfirmasi Reservasi';
-    showToast('Error Database: Gagal membuat reservasi.', 'err');
-    console.error(err);
+    showToast(err.message || 'Error sistem. Gagal membuat reservasi.', 'err');
+    console.error("Booking Error:", err);
+  } finally {
+    btn.disabled = false; 
+    document.getElementById('btn-text').textContent = 'Konfirmasi Reservasi';
+    btn.style.opacity = "1";
+    btn.style.cursor = "pointer";
   }
 }
 
@@ -262,5 +311,6 @@ function showToast(msg, type = '') {
   setTimeout(() => t.classList.remove('show'), 4000);
 }
 
+// Inisialisasi awal pembatasan kalender hari ini
 document.getElementById('f-tanggal').min = new Date().toISOString().split('T')[0];
 loadLayanan();

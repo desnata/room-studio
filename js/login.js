@@ -1,28 +1,48 @@
-const db = window.supabase.createClient('https://vhsrmfmvblfqolhwgwbt.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoc3JtZm12YmxmcW9saHdnd2J0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2ODQ4NjAsImV4cCI6MjA5MTI2MDg2MH0.jxVo-xAjpEyaqGiROMlWbdwmCga6GKNz_rnNrRYPpWQ');
+// ==========================================
+// LOGIKA UTAMA: HALAMAN LOGIN ADMIN
+// ==========================================
 
-// Cek apakah sudah login
+// Cek status sesi saat ini (jika sudah login, langsung lempar ke dashboard admin)
 async function checkSession() {
   const { data } = await db.auth.getSession();
   if (data.session) window.location.href = 'admin.html';
 }
+
+// Jalankan pemeriksaan sesi saat halaman dimuat
 checkSession();
 
+// Handler Event Kirim Form Login
+function togglePassword() {
+    const p = document.getElementById('password');
+    p.type = (p.type === 'password') ? 'text' : 'password';
+}
+
 document.getElementById('login-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const btn = document.getElementById('btn-login');
-  const err = document.getElementById('error-msg');
-  btn.disabled = true; btn.textContent = "Memeriksa..."; err.style.display = 'none';
+    e.preventDefault();
+    
+    const btn = document.getElementById('btn-login');
+    const err = document.getElementById('error-msg');
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    // UX: Beri feedback saat proses loading
+    btn.disabled = true; 
+    btn.textContent = "Memverifikasi..."; 
+    err.style.display = 'none';
 
-  const { data, error } = await db.auth.signInWithPassword({
-    email: document.getElementById('email').value,
-    password: document.getElementById('password').value
-  });
-
-  if (error) {
-    err.textContent = "Gagal masuk: " + error.message;
-    err.style.display = 'block';
-    btn.disabled = false; btn.textContent = "Masuk ke Sistem";
-  } else {
-    window.location.href = 'admin.html';
-  }
+    try {
+        const { data, error } = await db.auth.signInWithPassword({ email, password });
+        
+        if (error) throw error;
+        
+        // Redirect sukses
+        window.location.href = 'admin.html';
+    } catch (error) {
+        // Keamanan: Berikan pesan kesalahan yang umum, jangan beritahu apakah email atau pass yang salah
+        err.textContent = "Email atau Password salah. Silakan coba lagi.";
+        err.style.display = 'block';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Masuk ke Sistem";
+    }
 });

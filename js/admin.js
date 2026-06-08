@@ -1,7 +1,8 @@
-// INISIALISASI SUPABASE
-const db = window.supabase.createClient('https://vhsrmfmvblfqolhwgwbt.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoc3JtZm12YmxmcW9saHdnd2J0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2ODQ4NjAsImV4cCI6MjA5MTI2MDg2MH0.jxVo-xAjpEyaqGiROMlWbdwmCga6GKNz_rnNrRYPpWQ');
+// ==========================================
+// LOGIKA UTAMA: MANAGEMENT DASHBOARD ADMIN
+// ==========================================
 
-// CEK LOGIN
+// 1. CEK OTENTIKASI & SIDEPANEL LOCK
 async function checkAuth() {
   const { data: { session } } = await db.auth.getSession();
   if (!session) { window.location.href = 'login.html'; return; }
@@ -15,10 +16,19 @@ async function logout() {
   window.location.href = 'login.html';
 }
 
-// UTILS
+// 2. FUNGSI UTILITAS UMUM
+function escapeHTML(str) {
+  if (!str) return '-';
+  return str.toString()
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
 const $ = id => document.getElementById(id);
 let currentFilter = 'all';
-let allBookingsCache = []; 
+let allBookingsCache = [];
+let allCustomersCache = []; 
+let allServicesCache = [];
 
 function toggleSidebar() { $('sidebar').classList.toggle('open'); $('sidebar-overlay').classList.toggle('show'); }
 function showToast(msg) { const t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 3000); }
@@ -32,12 +42,13 @@ function statusBadge(s) {
   return `<span class="badge ${m[s]?.[0]}">${m[s]?.[1]}</span>`;
 }
 
-const panelTitles = { dashboard:'Dashboard Overview', bookings:'Manajemen Data Booking', schedule:'Jadwal Kunjungan', customers:'Database Pelanggan' };
+// 3. ROUTING VIEW PANEL INTERNAL
+const panelTitles = { dashboard:'Dashboard Overview', bookings:'Manajemen Data Booking', schedule:'Jadwal Kunjungan', customers:'Database Pelanggan', services:'Kelola Layanan' };
 function showPanel(p, btn) {
   document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
   $('panel-'+p).classList.add('active'); btn.classList.add('active'); $('topbar-title').textContent = panelTitles[p];
   if (window.innerWidth <= 768) { $('sidebar').classList.remove('open'); $('sidebar-overlay').classList.remove('show'); }
-  if(p==='dashboard') loadDashboard(); if(p==='bookings') loadBookings(); if(p==='schedule') loadJadwal(); if(p==='customers') loadPelanggan();
+  if(p=='dashboard') loadDashboard(); if(p=='bookings') loadBookings(); if(p=='schedule') loadJadwal(); if(p=='customers') loadPelanggan(); if(p=='services') loadServicesAdmin();
 }
 
 function formatBookingData(data) {
@@ -50,16 +61,14 @@ function formatBookingData(data) {
   });
 }
 
-// DASHBOARD
+// 4. MODUL VIEW: DASHBOARD OVERVIEW
 async function loadDashboard() {
   const today = new Date().toISOString().split('T')[0];
-  
   const { count: tAll } = await db.from('booking').select('*', { count: 'exact', head: true });
   const { count: tPending } = await db.from('booking').select('*', { count: 'exact', head: true }).eq('status', 'pending');
   const { count: tToday } = await db.from('booking').select('*', { count: 'exact', head: true }).eq('tanggal', today).neq('status', 'batal');
   const { count: tCust } = await db.from('pelanggan').select('*', { count: 'exact', head: true });
 
-  // PERBAIKAN WARNA: Mengubah var(--bg-sidebar) menjadi var(--primary-hover) agar terlihat jelas
   $('dash-stats').innerHTML = `
     <div class="stat-card"><div class="stat-title">Total Booking</div><div class="stat-value">${tAll||0}</div></div>
     <div class="stat-card"><div class="stat-title">Menunggu Konfirmasi</div><div class="stat-value" style="color:#d9534f">${tPending||0}</div></div>
@@ -70,31 +79,27 @@ async function loadDashboard() {
   const { data: recentRaw } = await db.from('booking').select('*, pelanggan(nama), booking_layanan(layanan(nama))').order('dibuat', {ascending: false}).limit(6);
   const recent = formatBookingData(recentRaw || []);
   $('dash-recent').innerHTML = recent.map(b=>`<tr>
-    <td><div><strong style="font-weight:600; color:var(--text-main);">${b.pelanggan_nama}</strong></div><div style="font-size:0.8rem;color:var(--text-muted)">${b.tanggal_fmt} | ${b.jam_fmt}</div></td>
+    <td><div><strong style="font-weight:600; color:var(--text-main);">${escapeHTML(b.pelanggan_nama)}</strong></div><div style="font-size:0.8rem;color:var(--text-muted)">${b.tanggal_fmt} | ${b.jam_fmt}</div></td>
     <td style="text-align:right">${statusBadge(b.status)}</td>
   </tr>`).join('');
 
   const { data: services } = await db.from('layanan').select('*').eq('aktif', true).limit(5);
   $('dash-popular').innerHTML = (services||[]).map(p=>`<tr>
-    <td><div style="font-size:0.9rem;font-weight:500">${p.nama}</div></td>
+    <td><div style="font-size:0.9rem;font-weight:500">${escapeHTML(p.nama)}</div></td>
     <td style="text-align:right;font-weight:600;color:var(--primary-hover)">Tersedia</td>
   </tr>`).join('');
 }
 
-// DATA BOOKING
+// 5. MODUL VIEW: MANAJEMEN BOOKING
 async function loadBookings() {
   const cari = $('s-booking').value.toLowerCase(); const tgl = $('s-tgl').value;
-  
   let query = db.from('booking').select('*, pelanggan(nama, telepon), booking_layanan(harga_saat_booking, layanan(nama))').order('tanggal', {ascending: false}).order('jam', {ascending: false});
   if (currentFilter !== 'all') query = query.eq('status', currentFilter);
   if (tgl) query = query.eq('tanggal', tgl);
 
   const { data } = await query;
   let formatted = formatBookingData(data || []);
-  
-  if (cari) {
-    formatted = formatted.filter(b => b.kode.toLowerCase().includes(cari));
-  }
+  if (cari) formatted = formatted.filter(b => b.kode.toLowerCase().includes(cari));
   
   allBookingsCache = formatted;
 
@@ -107,7 +112,6 @@ async function loadBookings() {
     <td>${statusBadge(b.status)}</td>
     <td>
       <div class="action-btns" style="display: flex; gap: 0.5rem; align-items: center;">
-        
         <button class="btn btn-detail" onclick="detailBooking(${b.id})">Detail</button>        
         ${b.status==='pending' ? `<button class="btn btn-success" style="padding: 0.4rem 0.6rem; display: flex; align-items: center;" onclick="updateStatus(${b.id},'confirmed')" title="Konfirmasi">✓</button>` : ''}
         <button class="btn btn-danger" style="padding: 0.4rem 0.6rem; display: flex; align-items: center;" onclick="hapusBooking('${b.id}')" title="Hapus Booking">
@@ -130,11 +134,11 @@ function detailBooking(id) {
   if(!b) return;
   $('m-title').textContent = 'Reservasi ' + b.kode;
   $('m-body').innerHTML = `
-    <div class="detail-row"><div class="detail-lbl">Pelanggan</div><div class="detail-val" style="font-weight:600;">${b.pelanggan_nama} (${b.telepon})</div></div>
-    <div class="detail-row"><div class="detail-lbl">Layanan</div><div class="detail-val">${b.layanan_list.join('<br>')}</div></div>
-    <div class="detail-row"><div class="detail-lbl">Jadwal</div><div class="detail-val" style="font-weight:600;">${b.tanggal_fmt} pukul ${b.jam_fmt}</div></div>
-    <div class="detail-row"><div class="detail-lbl">Catatan</div><div class="detail-val">${b.catatan||'-'}</div></div>
-    <div class="detail-row"><div class="detail-lbl">Status</div><div class="detail-val">${statusBadge(b.status)}</div></div>
+    <div class="detail-row"><div class="detail-lbl">Pelanggan</div><div class="detail-val" style="font-weight:600;">${escapeHTML(b.pelanggan_nama)} (${escapeHTML(b.telepon)})</div></div>
+    <div class="detail-row"><div class="detail-lbl">Layanan</div><div class="detail-val">${b.layanan_list.map(escapeHTML).join('<br>')}</div></div>
+    <div class="detail-row"><div class="detail-lbl">Jadwal</div><div class="detail-val" style="font-weight:600;">${escapeHTML(b.tanggal_fmt)} pukul ${escapeHTML(b.jam_fmt)}</div></div>
+    <div class="detail-row"><div class="detail-lbl">Catatan</div><div class="detail-val">${escapeHTML(b.catatan)||'-'}</div></div>
+    <div class="detail-row"><div class="detail-lbl">Status</div><div class="detail-val">${statusBadge(escapeHTML(b.status))}</div></div>
   `;
   let foot = `<button class="btn btn-detail" onclick="closeModal()">Tutup</button>`;
   if(b.status==='pending') foot += `<button class="btn btn-danger" onclick="updateStatus(${b.id},'batal')">Batalkan</button> <button class="btn btn-success" onclick="updateStatus(${b.id},'confirmed')">Konfirmasi Terima</button>`;
@@ -142,7 +146,20 @@ function detailBooking(id) {
   $('m-foot').innerHTML = foot; openModal();
 }
 
-// JADWAL
+async function hapusBooking(id) {
+  const yakin = confirm("Apakah Anda yakin ingin menghapus data booking ini? Data yang dihapus tidak dapat dikembalikan.");
+  if (!yakin) return;
+  try {
+    const { error } = await db.from('booking').delete().eq('id', id);  
+    if (error) throw error;
+    showToast("Data booking berhasil dihapus!");
+    loadBookings(); loadDashboard();
+  } catch (error) {
+    console.error(error); alert("Gagal menghapus data booking.");
+  }
+}
+
+// 6. MODUL VIEW: TIMELINE JADWAL KUNJUNGAN
 function shiftWeek(d) { const dt = new Date($('week-start').value || new Date()); dt.setDate(dt.getDate() + d); $('week-start').value = dt.toISOString().split('T')[0]; loadJadwal(); }
 
 async function loadJadwal() {
@@ -157,7 +174,6 @@ async function loadJadwal() {
   for(let i=0; i<7; i++) {
     const d = new Date(mulai+'T00:00:00'); d.setDate(d.getDate()+i); const ds = d.toISOString().split('T')[0];
     const dayData = formatData.filter(b=>b.tanggal===ds);
-    // PERBAIKAN WARNA: Slot terisi menjadi warna pink utama
     html += `<div class="sched-day"><div class="sched-header"><div>${d.toLocaleDateString('id-ID',{weekday:'long', day:'numeric', month:'long'})}</div><div style="font-size:0.85rem;color:var(--primary-hover)">${dayData.length} slot terisi</div></div>`;
     times.forEach(t => {
       const bk = dayData.find(b=>b.jam_fmt===t);
@@ -168,27 +184,154 @@ async function loadJadwal() {
   $('sched-week').innerHTML = html;
 }
 
-// PELANGGAN
+// 7. MODUL VIEW: DATABASE PELANGGAN
 async function loadPelanggan() {
   const cari = $('s-cust').value.toLowerCase();
   const { data } = await db.from('pelanggan').select('*').order('dibuat', {ascending:false});
   let filtered = data || [];
   if(cari) filtered = filtered.filter(p => p.nama.toLowerCase().includes(cari) || p.telepon.includes(cari));
 
-  // PERBAIKAN WARNA: Mengubah color teks tanggal pada badge menjadi warna gelap (text-main) atau pink (primary-hover)
+  allCustomersCache = filtered; 
+
   $('cust-tbody').innerHTML = filtered.map(c=>`<tr>
     <td style="font-weight:600">${c.nama}</td>
     <td>${c.telepon}</td>
     <td><span class="badge" style="background:var(--primary-soft);color:var(--primary-hover);font-weight:600;">${formatDate(c.dibuat)}</span></td>
     <td>
-  <button class="btn btn-danger" style="padding: 0.4rem 0.8rem;" onclick="hapusPelanggan('${c.id}')" title="Hapus Pelanggan">
-    <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
-  </button>
-</td>
+      <button class="btn btn-danger" style="padding: 0.4rem 0.8rem;" onclick="hapusPelanggan('${c.id}')" title="Hapus Pelanggan">
+        <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
+      </button>
+    </td>
   </tr>`).join('');
 }
 
-// NOTIFIKASI REAL-TIME
+async function hapusPelanggan(id) {
+  const yakin = confirm("Yakin ingin menghapus pelanggan ini? Pastikan pelanggan ini tidak memiliki data booking yang masih aktif.");
+  if (!yakin) return;
+  try {
+    const { error } = await db.from('pelanggan').delete().eq('id', id);
+    if (error) throw error;
+    showToast("Data pelanggan berhasil dihapus!");
+    loadPelanggan(); loadDashboard();
+  } catch (error) {
+    console.error(error); alert("Gagal menghapus data. Jika pelanggan memiliki histori booking, hapus bookingnya terlebih dahulu.");
+  }
+}
+
+// 8. MODUL VIEW: KELOLA MASTER LAYANAN
+async function loadServicesAdmin() {
+  const { data, error } = await db.from('layanan').select('*').order('nama', {ascending: true});
+  if (error) { console.error(error); return; }
+  allServicesCache = data;
+
+  document.getElementById('services-tbody').innerHTML = data.map(s => `
+    <tr>
+      <td style="font-weight:600;">${s.nama}</td>
+      <td>${formatRp(s.harga_min)}</td>
+      <td>
+        <span class="badge ${s.aktif ? 'badge-confirmed' : 'badge-batal'}">${s.aktif ? 'Aktif' : 'Nonaktif'}</span>
+      </td>
+      <td>
+        <div class="action-btns">
+          <button class="btn btn-detail" onclick="openServiceModal(${s.id})">Edit</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openServiceModal(id = null) {
+  let svc = id ? allServicesCache.find(s => s.id === id) : {nama: '', harga_min: '', aktif: true};
+  document.getElementById('m-title').textContent = id ? 'Edit Layanan' : 'Tambah Layanan Baru';
+  document.getElementById('m-body').innerHTML = `
+    <div style="display:flex; flex-direction:column; gap:1rem;">
+      <div>
+        <label style="font-size:0.8rem; font-weight:600; color:var(--text-muted);">NAMA LAYANAN</label>
+        <input type="text" id="m-svc-nama" class="input-search" value="${svc.nama}" style="max-width:100%; margin-top:0.3rem;">
+      </div>
+      <div>
+        <label style="font-size:0.8rem; font-weight:600; color:var(--text-muted);">HARGA DASAR (Rp)</label>
+        <input type="number" id="m-svc-harga" class="input-search" value="${svc.harga_min}" style="max-width:100%; margin-top:0.3rem;">
+      </div>
+      <div>
+        <label style="font-size:0.8rem; font-weight:600; color:var(--text-muted);">STATUS LAYANAN</label>
+        <select id="m-svc-status" class="input-search" style="max-width:100%; margin-top:0.3rem;">
+          <option value="true" ${svc.aktif ? 'selected' : ''}>Aktif (Tampil di Website)</option>
+          <option value="false" ${!svc.aktif ? 'selected' : ''}>Nonaktif (Sembunyikan)</option>
+        </select>
+      </div>
+    </div>
+  `;
+  document.getElementById('m-foot').innerHTML = `
+    <button class="btn btn-detail" onclick="closeModal()">Batal</button>
+    <button class="btn btn-success" onclick="simpanService(${id})">Simpan Layanan</button>
+  `;
+  openModal();
+}
+
+// Handler Simpan Data CRUD Layanan ke DB
+async function simpanService(id) {
+  const nama = document.getElementById('m-svc-nama').value.trim();
+  const harga = document.getElementById('m-svc-harga').value;
+  const aktif = document.getElementById('m-svc-status').value === 'true';
+
+  if (!nama || !harga) { alert("Nama dan Harga harus diisi!"); return; }
+  const payload = { nama: nama, harga_min: harga, aktif: aktif };
+  let error;
+
+  if (id) {
+    const res = await db.from('layanan').update(payload).eq('id', id);
+    error = res.error;
+  } else {
+    const res = await db.from('layanan').insert([payload]);
+    error = res.error;
+  }
+
+  if (error) {
+    alert("Gagal menyimpan layanan!"); console.error(error);
+  } else {
+    showToast("Layanan berhasil disimpan!"); closeModal();
+    loadServicesAdmin(); loadDashboard();
+  }
+}
+
+// 9. MODUL EKSPOR DATA KE CSV EXCEL
+function exportKeCSV() {
+  if (!allBookingsCache || allBookingsCache.length === 0) {
+    alert("Tidak ada data untuk di-export pada filter saat ini!"); return;
+  }
+  let csvContent = "data:text/csv;charset=utf-8,Kode,Pelanggan,WhatsApp,Tanggal,Jam,Layanan,Total Harga,Status\n";
+  allBookingsCache.forEach(b => {
+    let layanan = b.layanan_list.join(" & ");
+    let row = `"${b.kode}","${b.pelanggan_nama}","${b.telepon}","${b.tanggal_fmt}","${b.jam_fmt}","${layanan}","${b.total_harga}","${b.status}"`;
+    csvContent += row + "\n";
+  });
+  triggerDownload(csvContent, `Laporan_Booking_RoomStudio_${new Date().toISOString().split('T')[0]}.csv`);
+}
+
+function exportPelangganKeCSV() {
+  if (!allCustomersCache || allCustomersCache.length === 0) {
+    alert("Tidak ada data pelanggan untuk di-export pada pencarian ini!"); return;
+  }
+  let csvContent = "data:text/csv;charset=utf-8,Nama Pelanggan,No WhatsApp,Terdaftar Pada\n";
+  allCustomersCache.forEach(c => {
+    let row = `"${c.nama}","${c.telepon}","${formatDate(c.dibuat)}"`;
+    csvContent += row + "\n";
+  });
+  triggerDownload(csvContent, `Data_Pelanggan_RoomStudio_${new Date().toISOString().split('T')[0]}.csv`);
+}
+
+function triggerDownload(content, fileName) {
+  const encodedUri = encodeURI(content);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", fileName);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// 10. REAL-TIME DATABASE LISTENER (SUPABASE BROADCAST)
 function setupRealtime() {
   db.channel('custom-insert-channel')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'booking' }, (payload) => {
@@ -199,62 +342,10 @@ function setupRealtime() {
     .subscribe();
 }
 
-// INIT
+// 11. SISTEM INISIALISASI UTAMA ADMIN
 document.addEventListener('DOMContentLoaded', () => {
   $('topbar-date').textContent = new Date().toLocaleDateString('id-ID', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
   if($('week-start')) $('week-start').value = new Date().toISOString().split('T')[0];
   loadDashboard();
   setupRealtime();
 });
-// --- FUNGSI HAPUS BOOKING ---
-async function hapusBooking(id) {
-  // Konfirmasi sebelum menghapus
-  const yakin = confirm("Apakah Anda yakin ingin menghapus data booking ini? Data yang dihapus tidak dapat dikembalikan.");
-  if (!yakin) return;
-
-  try {
-    // Gunakan 'db', BUKAN 'supabase'
-    const { error } = await db
-      .from('booking') 
-      .delete()
-      .eq('id', id);  
-
-    if (error) throw error;
-
-    if(typeof showToast === 'function') showToast("Data booking berhasil dihapus!");
-    else alert("Data booking berhasil dihapus!");
-
-    loadBookings(); // Refresh tabel
-    loadDashboard(); // Refresh angka di dashboard atas
-    
-  } catch (error) {
-    console.error("Error menghapus booking:", error);
-    alert("Gagal menghapus data booking. Silakan coba lagi.");
-  }
-}
-
-// --- FUNGSI HAPUS PELANGGAN ---
-async function hapusPelanggan(id) {
-  const yakin = confirm("Yakin ingin menghapus pelanggan ini? Pastikan pelanggan ini tidak memiliki data booking yang masih aktif.");
-  if (!yakin) return;
-
-  try {
-    // Gunakan 'db', BUKAN 'supabase'
-    const { error } = await db
-      .from('pelanggan') 
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
-
-    if(typeof showToast === 'function') showToast("Data pelanggan berhasil dihapus!");
-    else alert("Data pelanggan berhasil dihapus!");
-
-    loadPelanggan(); // Refresh tabel pelanggan
-    loadDashboard(); // Refresh angka pelanggan di dashboard
-    
-  } catch (error) {
-    console.error("Error menghapus pelanggan:", error);
-    alert("Gagal menghapus data. Jika pelanggan ini memiliki history booking, hapus bookingnya terlebih dahulu.");
-  }
-}

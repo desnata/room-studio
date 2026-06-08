@@ -34,13 +34,16 @@
     <div class="nav-item" onclick="showPanel('customers',this)">
       <span class="material-symbols-outlined">group</span> Data Pelanggan
     </div>
+    <div class="nav-item" id="nav-services" onclick="showPanel('services',this)">
+      <span class="material-symbols-outlined">spa</span> Kelola Layanan
+    </div>
   </div>
   <div class="sidebar-footer">
     <div class="user-info">
       <div class="user-avatar" id="admin-avatar">A</div>
       <div style="font-size:0.85rem">
         <div style="font-weight:600;color:var(--text-main)" id="admin-email">Admin</div>
-        <a href="index.html" target="_blank" style="color:var(--text-muted);text-decoration:none;font-size:0.75rem;display:flex;align-items:center;gap:3px;margin-top:2px;">
+        <a href="Home.html" target="_blank" style="color:var(--text-muted);text-decoration:none;font-size:0.75rem;display:flex;align-items:center;gap:3px;margin-top:2px;">
           <span class="material-symbols-outlined" style="font-size: 14px;">language</span> Lihat Website
         </a>
       </div>
@@ -62,15 +65,17 @@
 
   <div class="content-area">
     <div class="panel active" id="panel-dashboard">
-      <div class="stats-grid" id="dash-stats">
-          </div>
+      <div class="stats-grid" id="dash-stats"></div>
       <div class="dashboard-grid-container">
         <div class="card">
           <div class="card-header"><span style="font-weight:600; font-family: var(--serif); font-size: 1.1rem;">Booking Terbaru</span></div>
           <div class="table-responsive"><table><tbody id="dash-recent"></tbody></table></div>
         </div>
         <div class="card">
-          <div class="card-header"><span style="font-weight:600; font-family: var(--serif); font-size: 1.1rem;">Layanan Tersedia</span></div>
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight:600; font-family: var(--serif); font-size: 1.1rem;">Layanan Tersedia</span>
+            <button class="btn-outline-sm" style="padding: 0.3rem 0.8rem; font-size: 0.8rem; border-radius: 6px; border: 1px solid var(--primary); background: transparent; color: var(--primary); cursor: pointer;" onclick="showPanel('services', document.getElementById('nav-services'))">Kelola Layanan</button>
+          </div>
           <div class="table-responsive"><table><tbody id="dash-popular"></tbody></table></div>
         </div>
       </div>
@@ -80,14 +85,15 @@
       <div class="card">
         <div class="card-header" style="flex-direction: column; align-items: stretch; gap: 1rem;">
           <div style="display:flex; gap:0.5rem; align-items:center; width:100%;">
-             <input type="text" class="input-search" placeholder="Cari Kode RS..." id="s-booking" oninput="loadBookings()"/>
-             <input type="date" class="input-search" id="s-tgl" onchange="loadBookings()"/>
+          <input type="text" class="input-search" placeholder="Cari Kode RS..." id="s-booking" oninput="loadBookings()"/>
+          <input type="date" class="input-search" id="s-tgl" onchange="loadBookings()"/>
           </div>
           <div class="filter-group">
             <button class="btn-filter active" onclick="setFilter('all',this)">Semua</button>
             <button class="btn-filter" onclick="setFilter('pending',this)">Pending</button>
             <button class="btn-filter" onclick="setFilter('confirmed',this)">Confirmed</button>
             <button class="btn-filter" onclick="setFilter('selesai',this)">Selesai</button>
+            <button class="btn btn-success" onclick="exportKeCSV()" style="padding: 0.5rem 1rem; border-radius: 30px;"><span class="material-symbols-outlined" style="font-size: 16px;">download</span> Export CSV</button>
           </div>
         </div>
         <div class="table-responsive">
@@ -113,7 +119,12 @@
 
     <div class="panel" id="panel-customers">
       <div class="card">
-        <div class="card-header"><input type="text" class="input-search" placeholder="Cari nama/WA pelanggan..." id="s-cust" oninput="loadPelanggan()"/></div>
+        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+          <input type="text" class="input-search" placeholder="Cari nama/WA pelanggan..." id="s-cust" oninput="loadPelanggan()"/>
+          <button class="btn btn-success" onclick="exportPelangganKeCSV()" style="padding: 0.5rem 1rem; border-radius: 30px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">download</span> Export CSV
+          </button>
+        </div>
         <div class="table-responsive">
           <table>
             <thead><tr><th>Nama Pelanggan</th><th>No. WhatsApp</th><th>Terdaftar Pada</th><th style="width: 80px;">Aksi</th></tr></thead>
@@ -122,10 +133,25 @@
         </div>
       </div>
     </div>
-  </div>
-</div>
 
-<div class="modal-overlay" id="modal-bg" onclick="if(event.target===this)closeModal()">
+    <div class="panel" id="panel-services">
+      <div class="card">
+        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+          <div class="card-title" style="font-weight:600; font-family: var(--serif); font-size: 1.1rem;">Manajemen Layanan & Harga</div>
+          <button class="btn btn-success" style="display:flex; align-items:center; gap:5px; padding: 0.5rem 1rem; border-radius: 30px;" onclick="openServiceModal()">
+          <span class="material-symbols-outlined" style="font-size: 18px;">add</span> Tambah Layanan
+          </button>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>Nama Layanan</th><th>Harga Dasar</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="services-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div> </div> <div class="modal-overlay" id="modal-bg" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="m-title">Detail</div>
@@ -139,6 +165,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
 <script src="js/admin.js"></script>
 </body>
 </html>
