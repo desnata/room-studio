@@ -17,7 +17,7 @@ let selectedServices = new Set();
 let uniqueCategories = [];
 
 // Kamus Gambar & Deskripsi Katalog Layanan
-const sampleImages = {'Eyelash': 'image/Eyelash.jpg', 'Nail': 'image/Nail.jpg'};
+const sampleImages = {'Eyelash': 'image/Eyelash.webp', 'Nail': 'image/Nail.webp'};
 const defaultImg = 'image/Latar.jpg';
 
 const categoryDescriptions = {
