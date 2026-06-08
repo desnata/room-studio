@@ -174,8 +174,15 @@ tr:hover td { background: var(--bg-app); }
   .modal-overlay { align-items: flex-end; padding: 0; }
   .toast { bottom: 1rem; left: 1rem; right: 1rem; }
 }
-
 @media (max-width: 480px) { 
   .sched-slot { flex-direction: column; align-items: flex-start; gap: 0.5rem; } 
   .sched-time { margin-bottom: 0.2rem; width: auto; background: var(--primary-soft); padding: 0.2rem 0.8rem; border-radius: 20px; font-size: 0.85rem; } 
+}
+/* Sembunyikan tombol navigasi di sidebar */
+#nav-bookings, [onclick*="showPanel('bookings'"] {
+    display: none !important;
+}
+/* Sembunyikan panel datanya */
+#panel-bookings {
+    display: none !important;
 }
