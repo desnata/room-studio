@@ -196,6 +196,18 @@
 
 <script>
 function selectTime(time, element) {
+  // 1. Validasi apakah tanggal sudah diisi
+  const tanggal = document.getElementById('f-tanggal').value;
+  if (!tanggal) {
+    // Menampilkan pesan error menggunakan fungsi toast bawaan main.js
+    if (typeof showToast === 'function') {
+      showToast('Silakan pilih tanggal kunjungan terlebih dahulu!', 'err');
+    } else {
+      alert('Silakan pilih tanggal kunjungan terlebih dahulu!');
+    }
+    return; // Stop proses, jam tidak akan terpilih
+  }
+  // 2. Jika tanggal sudah ada, lanjutkan proses seperti biasa
   document.getElementById('f-jam').value = time;
   let pills = document.querySelectorAll('.time-pill');
   pills.forEach(p => p.classList.remove('active'));
