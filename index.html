@@ -199,7 +199,6 @@ function selectTime(time, element) {
   // 1. Validasi apakah tanggal sudah diisi
   const tanggal = document.getElementById('f-tanggal').value;
   if (!tanggal) {
-    // Menampilkan pesan error menggunakan fungsi toast bawaan main.js
     if (typeof showToast === 'function') {
       showToast('Silakan pilih tanggal kunjungan terlebih dahulu!', 'err');
     } else {
@@ -207,14 +206,24 @@ function selectTime(time, element) {
     }
     return; // Stop proses, jam tidak akan terpilih
   }
-  // 2. Jika tanggal sudah ada, lanjutkan proses seperti biasa
+
+  // 2. Validasi agar jam yang sudah penuh (disabled) tidak bisa diklik
+  if (element.classList.contains('disabled')) {
+    if (typeof showToast === 'function') {
+      showToast('Maaf, jam ini sudah dipesan. Silakan pilih jam lain.', 'err');
+    }
+    return;
+  }
+
+  // 3. Jika tanggal sudah ada dan jam tersedia, lanjutkan proses
   document.getElementById('f-jam').value = time;
+  
+  // Hapus warna aktif dari semua kotak jam
   let pills = document.querySelectorAll('.time-pill');
   pills.forEach(p => p.classList.remove('active'));
+  
+  // Berikan warna aktif pada jam yang baru saja diklik
   element.classList.add('active');
-  if(typeof cekSlot === 'function') {
-    cekSlot();
-  }
 }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
