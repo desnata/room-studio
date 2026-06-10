@@ -160,19 +160,34 @@ async function hapusBooking(id) {
 }
 
 // 6. MODUL VIEW: TIMELINE JADWAL KUNJUNGAN
-function shiftWeek(d) { const dt = new Date($('week-start').value || new Date()); dt.setDate(dt.getDate() + d); $('week-start').value = dt.toISOString().split('T')[0]; loadJadwal(); }
+function shiftWeek(d) { 
+  const dt = new Date(($('week-start').value || new Date().toISOString().split('T')[0]) + 'T00:00:00'); 
+  dt.setDate(dt.getDate() + d); 
+  $('week-start').value = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`; 
+  loadJadwal(); 
+}
 
 async function loadJadwal() {
-  const mulai = $('week-start').value || new Date().toISOString().split('T')[0];
-  const endD = new Date(mulai); endD.setDate(endD.getDate() + 6);
-  const akhir = endD.toISOString().split('T')[0];
+  const now = new Date();
+  const localToday = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const mulai = $('week-start').value || localToday;
+  
+  const endD = new Date(mulai + 'T00:00:00'); 
+  endD.setDate(endD.getDate() + 6);
+  const akhir = `${endD.getFullYear()}-${String(endD.getMonth()+1).padStart(2,'0')}-${String(endD.getDate()).padStart(2,'0')}`;
 
   const { data } = await db.from('booking').select('*, pelanggan(nama), booking_layanan(layanan(nama))').gte('tanggal', mulai).lte('tanggal', akhir).neq('status', 'batal');
   const formatData = formatBookingData(data || []);
   const times = ['10:00','10:30','11:00','11:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00'];
   let html = '';
+  
   for(let i=0; i<7; i++) {
-    const d = new Date(mulai+'T00:00:00'); d.setDate(d.getDate()+i); const ds = d.toISOString().split('T')[0];
+    const d = new Date(mulai+'T00:00:00'); 
+    d.setDate(d.getDate()+i); 
+    
+    // Perbaikan ds: Generate tanggal string lokal murni (YYYY-MM-DD) agar akurat mencocokkan DB tanpa bug ISOString UTC
+    const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    
     const dayData = formatData.filter(b=>b.tanggal===ds);
     html += `<div class="sched-day"><div class="sched-header"><div>${d.toLocaleDateString('id-ID',{weekday:'long', day:'numeric', month:'long'})}</div><div style="font-size:0.85rem;color:var(--primary-hover)">${dayData.length} slot terisi</div></div>`;
     times.forEach(t => {
